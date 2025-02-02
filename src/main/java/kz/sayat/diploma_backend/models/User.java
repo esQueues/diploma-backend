@@ -17,37 +17,20 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
-
-    @Column(name = "username")
-    @NotBlank(message = "Name is mandatory")
-    @Size(min = 2, max = 50)
-    private String username;
-
-    @Column(name = "password")
-    @NotBlank(message = "Password is mandatory")
-//    @Size(min = 4, max = 50,message = "Password have to be minimum 5 character")
-    private String password;
-
     @Column(name = "email")
-    @Email
     private String email;
+    @Column(name = "password")
+    private String password;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole role;
+    @Column(name = "firstname")
+    private String firstname;
 
-    @Column(name = "first_name")
-    @NotBlank(message = "First name is mandatory")
-    @Size(min = 2, max = 50,message = "First name have to be minimum 2 character")
-    private String firstName;
-
-    @Column(name = "last_name")
-    @NotBlank(message = "Last name is mandatory")
-    @Size(min = 2, max = 50,message = "Last name have to be minimum 2 character")
-    private String lastName;
-
+    @Column(name = "lastname")
+    private String lastname;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

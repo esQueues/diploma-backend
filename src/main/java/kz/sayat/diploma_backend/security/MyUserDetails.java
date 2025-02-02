@@ -11,7 +11,7 @@ import java.util.Collections;
 
 public class MyUserDetails implements UserDetails {
 
-    private User user;
+    private final User user;
 
     public MyUserDetails(User user) {
         this.user = user;
@@ -19,17 +19,17 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+        return Collections.singletonList(new SimpleGrantedAuthority( user.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return this.user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return this.user.getEmail();
     }
 
     @Override
@@ -50,5 +50,9 @@ public class MyUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User getUser() {
+        return this.user;
     }
 }

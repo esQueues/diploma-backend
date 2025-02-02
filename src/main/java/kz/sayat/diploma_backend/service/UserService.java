@@ -3,45 +3,39 @@ package kz.sayat.diploma_backend.service;
 import kz.sayat.diploma_backend.models.User;
 import kz.sayat.diploma_backend.models.UserRole;
 import kz.sayat.diploma_backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    public boolean isEmailExist(String email) {
+        return userRepository.existsByEmail(email);
+    }
 
-    @Autowired
-    private JWTService jwtService;
-
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-
-    public void register(User user) {
-        user.setPassword(encoder.encode(user.getPassword()));
-        user.setRole(UserRole.STUDENT);
-        user.setCreatedAt(LocalDateTime.now());
+    public void save(User user) {
         userRepository.save(user);
     }
 
-    public String verify(User user) {
-        Authentication authentication =
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-
-        if(authentication.isAuthenticated()) {
-            return jwtService.generateToken(user.getUsername());
-        }
-        return "fail";
-    }
+//    public void register(User user) {
+//        user.setPassword(encoder.encode(user.getPassword()));
+//        user.setRole(UserRole.STUDENT);
+//        user.setCreatedAt(LocalDateTime.now());
+//        userRepository.save(user);
+//    }
 
 
 }
