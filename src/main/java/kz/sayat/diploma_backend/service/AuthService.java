@@ -3,7 +3,7 @@ package kz.sayat.diploma_backend.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kz.sayat.diploma_backend.exception.AuthException;
-import kz.sayat.diploma_backend.mapper.UserMapper;
+
 import kz.sayat.diploma_backend.models.User;
 import kz.sayat.diploma_backend.models.UserRole;
 import kz.sayat.diploma_backend.repository.UserRepository;
@@ -33,16 +33,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
-    private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+//    private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-    private final UserRepository userRepository;
 
     public void login(HttpServletRequest request, HttpServletResponse response, LoginRequest authRequest) {
         UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated
             (authRequest.email(), authRequest.password());
         authenticate(token, request, response);
 
-        System.out.println(authRequest.email()+"signed in");
+        System.out.println(authRequest.email()+"   signed in");
     }
 
     public void register(RegisterRequest request){
@@ -56,7 +55,7 @@ public class AuthService {
         user.setLastname(request.lastname());
         user.setRole(UserRole.STUDENT);
         user.setCreatedAt(LocalDateTime.now());
-        userRepository.save(user);
+        userService.save(user);
         //vertification
         System.out.println(request.email()+"signed up");
     }

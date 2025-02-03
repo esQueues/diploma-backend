@@ -1,19 +1,17 @@
 package kz.sayat.diploma_backend.service;
 
+
+import kz.sayat.diploma_backend.dto.UserDto;
+import kz.sayat.diploma_backend.exception.UnAuthException;
+import kz.sayat.diploma_backend.mapper.UserMapper;
 import kz.sayat.diploma_backend.models.User;
-import kz.sayat.diploma_backend.models.UserRole;
 import kz.sayat.diploma_backend.repository.UserRepository;
+import kz.sayat.diploma_backend.security.MyUserDetails;
+import kz.sayat.diploma_backend.security.authReq.RegisterRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -21,6 +19,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public boolean isEmailExist(String email) {
         return userRepository.existsByEmail(email);
@@ -30,12 +29,17 @@ public class UserService {
         userRepository.save(user);
     }
 
-//    public void register(User user) {
-//        user.setPassword(encoder.encode(user.getPassword()));
-//        user.setRole(UserRole.STUDENT);
-//        user.setCreatedAt(LocalDateTime.now());
-//        userRepository.save(user);
-//    }
+    public UserDto getUserProfile(Authentication authentication) {
+        if(!authentication.isAuthenticated()){
+            throw new UnAuthException("User is not authenticated");
+        }
+        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser(); // Получаем объект User из MyUserDetails
+
+        return  userMapper.toUserDto(user);
+    }
+
+
 
 
 }
