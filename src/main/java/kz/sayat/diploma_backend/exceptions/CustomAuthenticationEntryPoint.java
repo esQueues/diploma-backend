@@ -1,4 +1,4 @@
-package kz.sayat.diploma_backend.exception;
+package kz.sayat.diploma_backend.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

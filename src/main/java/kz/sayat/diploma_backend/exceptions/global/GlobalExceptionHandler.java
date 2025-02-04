@@ -1,8 +1,8 @@
-package kz.sayat.diploma_backend.exception.global;
+package kz.sayat.diploma_backend.exceptions.global;
 
 import jakarta.servlet.http.HttpServletRequest;
-import kz.sayat.diploma_backend.exception.AuthException;
-import kz.sayat.diploma_backend.exception.UnAuthException;
+import kz.sayat.diploma_backend.exceptions.AuthException;
+import kz.sayat.diploma_backend.exceptions.UnAuthException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;

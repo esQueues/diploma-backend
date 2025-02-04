@@ -1,15 +1,15 @@
 package kz.sayat.diploma_backend.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserDto {
+public class TeacherDto {
     private int id;
     private String email;
     private String firstname;
     private String lastname;
+    private String bio;
+    private List<CourseDto> createdCourses;
 }

@@ -27,9 +27,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest registerRequest) {
-        System.out.println("RegisterRequest: " + registerRequest.email());
-
         authService.register(registerRequest);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/register/teacher")
+    public ResponseEntity<?> registerTeacher(@RequestBody @Valid RegisterRequest registerRequest) {
+        authService.registerTeacher(registerRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

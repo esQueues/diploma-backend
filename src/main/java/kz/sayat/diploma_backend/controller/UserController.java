@@ -22,4 +22,6 @@ public class UserController {
     public ResponseEntity<UserDto> getProfile(Authentication authentication) {
         return ResponseEntity.ok().body(userService.getUserProfile(authentication));
     }
+
+
 }

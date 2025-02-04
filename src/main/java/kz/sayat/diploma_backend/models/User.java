@@ -1,11 +1,9 @@
 package kz.sayat.diploma_backend.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import kz.sayat.diploma_backend.models.enums.UserRole;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
+
 import java.time.LocalDateTime;
 
 @Table(name = "users")
@@ -13,11 +11,12 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     private String email;
     private String password;
 
@@ -29,5 +28,9 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
 }
