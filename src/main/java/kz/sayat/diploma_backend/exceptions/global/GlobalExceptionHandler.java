@@ -2,7 +2,7 @@ package kz.sayat.diploma_backend.exceptions.global;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kz.sayat.diploma_backend.exceptions.AuthException;
-import kz.sayat.diploma_backend.exceptions.UnAuthException;
+import kz.sayat.diploma_backend.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,7 +20,9 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // 🔴 Handle validation errors (400)
+    /**
+     * Handle validation errors (400 Bad Request)
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
@@ -32,36 +34,45 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation Error", errors, request);
     }
 
-    // 🔴 Handle AuthException (e.g., "Email already exists")
+    /**
+     * Handle AuthException (400 Bad Request)
+     */
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<Map<String, Object>> handleAuthException(AuthException ex, HttpServletRequest request) {
         logger.warn("Auth error at {}: {}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.BAD_REQUEST, "Auth Error", ex.getMessage(), request);
     }
 
-    // 🔴 Handle BadCredentialsException (401 Unauthorized)
+    /**
+     * Handle BadCredentialsException (401 Unauthorized)
+     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
         logger.warn("Authentication failed at {}: {}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Authentication Failed", "Invalid email or password", request);
     }
 
-    // 🔴 Handle UnauthorizedException (401 Unauthorized)
-    @ExceptionHandler(UnAuthException.class)
-    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnAuthException ex, HttpServletRequest request) {
+    /**
+     * Handle UnauthorizedException (401 Unauthorized)
+     */
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex, HttpServletRequest request) {
         logger.warn("Unauthorized access at {}: {}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request);
     }
 
-
-    // 🔴 Handle all unexpected errors (500)
+    /**
+     * Handle all unexpected errors (500 Internal Server Error)
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGlobalException(Exception ex, HttpServletRequest request) {
         logger.error("Unexpected error at {}", request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "An unexpected error occurred.", request);
     }
 
-    // 🛠️ Helper method to format JSON responses
+    /**
+     * Helper method to build a consistent error response format
+     */
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String error, Object message, HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());

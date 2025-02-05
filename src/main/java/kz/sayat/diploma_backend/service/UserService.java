@@ -2,7 +2,7 @@ package kz.sayat.diploma_backend.service;
 
 
 import kz.sayat.diploma_backend.dto.UserDto;
-import kz.sayat.diploma_backend.exceptions.UnAuthException;
+import kz.sayat.diploma_backend.exceptions.UnauthorizedException;
 import kz.sayat.diploma_backend.mapper.UserMapper;
 import kz.sayat.diploma_backend.models.User;
 import kz.sayat.diploma_backend.repository.UserRepository;
@@ -31,7 +31,7 @@ public class UserService {
 
     public UserDto getUserProfile(Authentication authentication) {
         if(!authentication.isAuthenticated()){
-            throw new UnAuthException("User is not authenticated");
+            throw new UnauthorizedException("User is not authenticated");
         }
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();

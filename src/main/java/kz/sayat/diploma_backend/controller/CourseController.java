@@ -1,7 +1,6 @@
 package kz.sayat.diploma_backend.controller;
 
 import kz.sayat.diploma_backend.dto.CourseDto;
-import kz.sayat.diploma_backend.models.Course;
 import kz.sayat.diploma_backend.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,10 +16,8 @@ public class CourseController {
     private final CourseService courseService;
 
     @PostMapping()
-    public ResponseEntity<CourseDto> save(@RequestBody CourseDto courseDto, Authentication authentication) {
-        System.out.println(courseDto);
+    public ResponseEntity<CourseDto> courseCreation(@RequestBody CourseDto courseDto, Authentication authentication) {
         courseService.createCourse(courseDto,authentication);
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -28,4 +25,6 @@ public class CourseController {
     public ResponseEntity<CourseDto> getCourse(@PathVariable("id") int id) {
         return ResponseEntity .ok().body(courseService.findCourseById(id));
     }
+
+
 }
