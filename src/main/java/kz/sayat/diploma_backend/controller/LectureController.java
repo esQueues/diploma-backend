@@ -10,22 +10,21 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/lectures")
+@RequestMapping("/api/courses/modules")
 public class LectureController {
 
     private final LectureService lectureService;
 
-    @PostMapping
-    public ResponseEntity<LectureDto> createLecture(@RequestBody LectureDto dto) {
+    @PostMapping("/{moduleId}/lectures")
+    public ResponseEntity<LectureDto> createLecture(@RequestBody LectureDto dto, @PathVariable int moduleId) {
+        dto.setModuleId(moduleId);
         Lecture createdLecture = lectureService.createLecture(dto);
         dto.setId(createdLecture.getId());
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/lectures/{id}")
     public ResponseEntity<LectureDto> getLecture(@PathVariable("id") int id) {
         return ResponseEntity.ok().body(lectureService.findLectureById(id));
     }
-
-
 }

@@ -26,4 +26,8 @@ public class Module {
 
     @OneToMany(mappedBy = "module", cascade = CascadeType.REMOVE)
     private List<Lecture> lectures;
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.REMOVE)
+    private List<Quiz> quizzes;
+
 }

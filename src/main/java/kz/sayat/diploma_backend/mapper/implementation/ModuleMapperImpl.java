@@ -31,7 +31,6 @@ public class ModuleMapperImpl implements ModuleMapper {
         dto.setId(module.getId());
         dto.setTitle(module.getTitle());
         dto.setCourseId(module.getCourse().getId());
-
         return dto;
     }
 }

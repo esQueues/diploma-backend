@@ -26,7 +26,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
 
 
-    public void createCourse(CourseDto dto, Authentication authentication) {
+    public Course createCourse(CourseDto dto, Authentication authentication) {
         Course course = mapper.toCourse(dto);
 
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
@@ -35,7 +35,7 @@ public class CourseService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
         course.setTeacher(teacher);
 
-        courseRepository.save(course);
+        return courseRepository.save(course);
     }
 
 
