@@ -1,14 +1,15 @@
 package kz.sayat.diploma_backend.auth_module.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import kz.sayat.diploma_backend.course_module.models.Course;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "students")
@@ -23,5 +24,14 @@ public class Student extends User{
     private Integer gradeLevel;
 
     private String schoolInfo;
+
+    @ManyToMany
+    @JoinTable(
+        name = "enrollments",
+        joinColumns = @JoinColumn(name = "student_id"),  // Correct order matching SQL
+        inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    @JsonIgnore
+    private List<Course> courses;
 
 }

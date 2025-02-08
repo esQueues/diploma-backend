@@ -1,4 +1,4 @@
-package kz.sayat.diploma_backend.auth_module.config;
+package kz.sayat.diploma_backend.auth_module.security.config;
 
 import kz.sayat.diploma_backend.auth_module.exceptions.CustomAuthenticationEntryPoint;
 import kz.sayat.diploma_backend.auth_module.security.MyUserDetailsService;
