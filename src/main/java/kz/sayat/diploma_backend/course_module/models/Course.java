@@ -31,7 +31,7 @@ public class Course {
     @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE)
     private List<Module> modules;
 
-    @ManyToMany(mappedBy = "courses",fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "courses")
     private List<Student> students;
 
 }

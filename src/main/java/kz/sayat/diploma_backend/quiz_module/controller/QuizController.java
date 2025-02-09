@@ -5,6 +5,7 @@ import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
 import kz.sayat.diploma_backend.quiz_module.dto.StudentAnswerDto;
 import kz.sayat.diploma_backend.quiz_module.models.QuizAttempt;
 import kz.sayat.diploma_backend.quiz_module.models.Quiz;
+import kz.sayat.diploma_backend.quiz_module.service.GeminiService;
 import kz.sayat.diploma_backend.quiz_module.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 public class QuizController {
 
     private final QuizService quizService;
+    private final GeminiService geminiService;
 
     @PostMapping("/{moduleId}/quizzes")
     private ResponseEntity<QuizDto> createQuiz(@RequestBody QuizDto dto,
@@ -52,6 +54,17 @@ public class QuizController {
 
         return ResponseEntity.ok(quizAttemptDto);
     }
+
+    @PostMapping("/feedback/{attemptId}")
+    public ResponseEntity<String> getQuizFeedback(@PathVariable(name = "attemptId") int attemptId ) {
+        String quizResult = quizService.generatePrompt(attemptId);
+
+        String feedback = geminiService.getFeedback(quizResult);
+
+        return ResponseEntity.ok(feedback);
+
+    }
+
 
 
 }

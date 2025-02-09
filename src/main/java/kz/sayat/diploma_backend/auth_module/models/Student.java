@@ -25,13 +25,12 @@ public class Student extends User{
 
     private String schoolInfo;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "enrollments",
         joinColumns = @JoinColumn(name = "student_id"),  // Correct order matching SQL
         inverseJoinColumns = @JoinColumn(name = "course_id")
     )
-    @JsonIgnore
     private List<Course> courses;
 
 }

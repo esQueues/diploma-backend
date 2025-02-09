@@ -28,5 +28,11 @@ public class CourseController {
         return ResponseEntity .ok().body(courseService.findCourseById(id));
     }
 
+    @PostMapping("/{courseId}/enroll")
+    public ResponseEntity<String> enrollCourse(@PathVariable("courseId") int courseId, Authentication authentication) {
+        courseService.enrollCourse(courseId,authentication);
+        return ResponseEntity.ok("Student enrolled to course!");
+    }
+
 
 }

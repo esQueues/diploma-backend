@@ -14,6 +14,7 @@ import kz.sayat.diploma_backend.quiz_module.repository.AttemptAnswerRepository;
 import kz.sayat.diploma_backend.quiz_module.repository.QuizAttemptRepository;
 import kz.sayat.diploma_backend.quiz_module.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class QuizService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final StudentRepository studentRepository;
     private final AttemptAnswerRepository attemptAnswerRepository;
+
     private final QuizMapper mapper;
 
 
@@ -115,4 +117,44 @@ public class QuizService {
 
         return (double) correctAnswers / totalQuestions * 100;
     }
+
+    public String generatePrompt(int attemptId) {
+        // Fetch the quiz attempt from the database
+        QuizAttempt quizAttempt = quizAttemptRepository.findById(attemptId)
+            .orElseThrow(() -> new NoSuchElementException("Quiz attempt not found for ID: " + attemptId));
+
+        // Build a structured prompt with meaningful details
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Quiz Attempt Summary:\n");
+        prompt.append("Student: ").append(quizAttempt.getStudent().getFirstname()).append("\n");
+        prompt.append("Quiz Title: ").append(quizAttempt.getQuiz().getTitle()).append("\n");
+        prompt.append("Attempt Number: ").append(quizAttempt.getAttemptNumber()).append("\n");
+        prompt.append("Score: ").append(quizAttempt.getScore()).append("/100\n\n");
+
+
+        prompt.append("Answers:\n");
+        for (QuizAttemptAnswer attemptAnswer : quizAttempt.getAttemptAnswers()) {
+            Question question = attemptAnswer.getQuestion();
+
+            // Find the correct answer (assuming there's a method in Answer entity to check if it's correct)
+            String correctAnswerText = question.getAnswers().stream()
+                .filter(Answer::isCorrect)  // Assuming you have a boolean field `isCorrect` in `Answer`
+                .map(Answer::getAnswerText)
+                .findFirst()
+                .orElse("No correct answer found");
+
+            prompt.append("- Question: ").append(question.getQuestionText()).append("\n");
+            prompt.append("  Your Answer: ").append(attemptAnswer.getAnswer().getAnswerText()).append("\n");
+            prompt.append("  Correct Answer: ").append(correctAnswerText).append("\n");
+            prompt.append("  Result: ").append(attemptAnswer.isCorrect() ? "✅ Correct" : "❌ Incorrect").append("\n\n");
+        }
+
+        prompt.append("Provide detailed feedback on this quiz attempt. Highlight strengths, common mistakes, and suggest improvements.");
+
+        return prompt.toString();
+    }
+
+
+
+
 }
