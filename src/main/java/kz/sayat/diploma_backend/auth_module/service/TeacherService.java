@@ -2,12 +2,12 @@ package kz.sayat.diploma_backend.auth_module.service;
 
 import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
-import kz.sayat.diploma_backend.auth_module.exceptions.UnauthorizedException;
+import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
 import kz.sayat.diploma_backend.auth_module.mapper.TeacherMapper;
 import kz.sayat.diploma_backend.auth_module.models.Teacher;
 import kz.sayat.diploma_backend.auth_module.models.User;
 import kz.sayat.diploma_backend.auth_module.repository.TeacherRepository;
-import kz.sayat.diploma_backend.auth_module.security.MyUserDetails;
+import kz.sayat.diploma_backend.auth_module.models.MyUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

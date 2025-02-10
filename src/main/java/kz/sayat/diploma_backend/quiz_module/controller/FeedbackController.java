@@ -1,13 +1,12 @@
 package kz.sayat.diploma_backend.quiz_module.controller;
 
 import kz.sayat.diploma_backend.quiz_module.service.FeedbackService;
-import kz.sayat.diploma_backend.quiz_module.service.GeminiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,13 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeedbackController {
 
     private final FeedbackService feedbackService;
-    private final GeminiService geminiService;
 
     @PostMapping("/{attemptId}")
     public ResponseEntity<String> getQuizFeedback(@PathVariable(name = "attemptId") int attemptId ) {
+        return ResponseEntity.status(201).body(feedbackService.generateFeedback(attemptId));
+    }
 
-        String feedback = feedbackService.generateFeedback(attemptId);
-        return ResponseEntity.ok(feedback);
+    @GetMapping("/{attemptId}")
+    public ResponseEntity<String> getFeedback(@PathVariable(name = "attemptId") int attemptId,
+                                              Authentication authentication) throws AccessDeniedException {
+        return ResponseEntity.ok(feedbackService.getFeedbackOfStudent(attemptId,authentication));
     }
 
 }

@@ -29,27 +29,21 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.createQuestions(dtos, quizId));
     }
 
-//    @PutMapping("/question/{questionId}")
-//    public ResponseEntity<QuestionDto> updateQuestion(@PathVariable int questionId,
-//                                                      @RequestBody QuestionDto dto) {
-//        return ResponseEntity.ok(questionService.updateQuestion(questionId, dto));
-//    }
-//
-//
-//    @GetMapping("/question/{questionId}")
-//    public ResponseEntity<QuestionDto> getQuestionById(@PathVariable int questionId) {
-//        return ResponseEntity.ok(questionService.getQuestionById(questionId));
-//    }
-//
-//    @GetMapping("/{quizId}/questions")
-//    public ResponseEntity<List<QuestionDto>> getQuestionsByQuiz(@PathVariable int quizId) {
-//        return ResponseEntity.ok(questionService.getQuestionsByQuizId(quizId));
-//    }
-//
-//    @DeleteMapping("/question/{questionId}")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public void deleteQuestion(@PathVariable int questionId) {
-//        questionService.deleteQuestion(questionId);
-//    }
+
+    @GetMapping("/question/{questionId}")
+    public ResponseEntity<QuestionDto> getQuestionById(@PathVariable int questionId) {
+        return ResponseEntity.ok(questionService.getQuestionById(questionId));
+    }
+
+    @GetMapping("/{quizId}/questions")
+    public ResponseEntity<List<QuestionDto>> getQuestionsByQuiz(@PathVariable int quizId) {
+        return ResponseEntity.ok(questionService.getQuestionsByQuizId(quizId));
+    }
+
+    @DeleteMapping("/question/{questionId}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void deleteQuestion(@PathVariable int questionId) {
+        questionService.deleteQuestion(questionId);
+    }
 
 }

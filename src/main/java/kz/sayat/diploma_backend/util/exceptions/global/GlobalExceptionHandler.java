@@ -1,11 +1,13 @@
-package kz.sayat.diploma_backend.auth_module.exceptions.global;
+package kz.sayat.diploma_backend.util.exceptions.global;
 
 import jakarta.servlet.http.HttpServletRequest;
-import kz.sayat.diploma_backend.auth_module.exceptions.AuthException;
-import kz.sayat.diploma_backend.auth_module.exceptions.UnauthorizedException;
+import kz.sayat.diploma_backend.util.exceptions.AuthException;
+import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
+import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -59,6 +62,25 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex, HttpServletRequest request) {
         logger.warn("Unauthorized access at {}: {}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request);
+    }
+
+    /**
+     * Handle AuthenticationException (401 Unauthorized)
+     * Used instead of CustomAuthenticationEntryPoint
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+        logger.warn("Authentication required at {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", "Authenticate please to do this operation", request);
+    }
+
+    /**
+     * Handle Resource Not Found (404 Not Found)
+     */
+    @ExceptionHandler({NoSuchElementException.class, ResourceNotFoundException.class})
+    public ResponseEntity<Map<String, Object>> handleNotFoundException(Exception ex, HttpServletRequest request) {
+        logger.warn("Resource not found at {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
     }
 
     /**

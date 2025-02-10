@@ -1,4 +1,4 @@
-package kz.sayat.diploma_backend.auth_module.exceptions;
+package kz.sayat.diploma_backend.util.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

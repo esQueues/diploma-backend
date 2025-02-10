@@ -21,14 +21,14 @@ public class Student extends User{
 
     private LocalDate birthDate;
 
-    private Integer gradeLevel;
+    private String gradeLevel;
 
     private String schoolInfo;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "enrollments",
-        joinColumns = @JoinColumn(name = "student_id"),  // Correct order matching SQL
+        joinColumns = @JoinColumn(name = "student_id"),  
         inverseJoinColumns = @JoinColumn(name = "course_id")
     )
     private List<Course> courses;

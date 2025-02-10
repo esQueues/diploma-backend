@@ -2,7 +2,7 @@ package kz.sayat.diploma_backend.auth_module.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kz.sayat.diploma_backend.auth_module.exceptions.AuthException;
+import kz.sayat.diploma_backend.util.exceptions.AuthException;
 
 import kz.sayat.diploma_backend.auth_module.mapper.StudentMapper;
 import kz.sayat.diploma_backend.auth_module.mapper.TeacherMapper;
@@ -66,7 +66,6 @@ public class AuthService {
         Teacher teacher = teacherMapper.toTeacher(request);
 
         teacherService.save(teacher);
-        //vertification
         System.out.println(request.email()+"  register (teacher)");
     }
 

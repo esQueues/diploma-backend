@@ -1,12 +1,14 @@
 package kz.sayat.diploma_backend.quiz_module.service;
 
+import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.models.Student;
-import kz.sayat.diploma_backend.auth_module.models.User;
-import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
-import kz.sayat.diploma_backend.auth_module.security.MyUserDetails;
+import kz.sayat.diploma_backend.auth_module.service.StudentService;
+import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
+import kz.sayat.diploma_backend.quiz_module.dto.QuizAttemptDto;
 import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
 import kz.sayat.diploma_backend.quiz_module.dto.StudentAnswerDto;
+import kz.sayat.diploma_backend.quiz_module.mapper.QuizAttemptMapper;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuizMapper;
 import kz.sayat.diploma_backend.course_module.models.Module;
 import kz.sayat.diploma_backend.quiz_module.models.*;
@@ -15,81 +17,61 @@ import kz.sayat.diploma_backend.quiz_module.repository.AttemptAnswerRepository;
 import kz.sayat.diploma_backend.quiz_module.repository.QuizAttemptRepository;
 import kz.sayat.diploma_backend.quiz_module.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class QuizService {
 
     private final QuizRepository quizRepository;
     private final ModuleRepository moduleRepository;
     private final QuizAttemptRepository quizAttemptRepository;
-    private final StudentRepository studentRepository;
     private final AttemptAnswerRepository attemptAnswerRepository;
+    private final QuizAttemptMapper quizAttemptMapper;
+    private final StudentService studentService;
+    private final QuizMapper quizMapper;
 
-    private final QuizMapper mapper;
+    public QuizDto createQuiz(QuizDto dto, int moduleId) {
 
+        Module module = moduleRepository.findById(moduleId).
+            orElseThrow(() -> new ResourceNotFoundException("module not found"));
+        Quiz quiz = quizMapper.toQuiz(dto, module);
 
-    public Quiz createQuiz(QuizDto dto) {
-        Module module= moduleRepository.findById(dto.getModuleId()).
-            orElseThrow(NoSuchElementException::new);
-        Quiz quiz = mapper.toQuiz(dto);
-        quiz.setModule(module);
-        return quizRepository.save(quiz);
+        quizRepository.save(quiz);
 
+        return quizMapper.toQuizDto(quiz);
     }
 
     public QuizDto findQuiz(int quizId) {
         Quiz quiz = quizRepository.findById(quizId).
-            orElseThrow(NoSuchElementException::new);
+            orElseThrow(() -> new ResourceNotFoundException("quiz not found"));
 
-        return mapper.toQuizDto(quiz);
+        return quizMapper.toQuizDto(quiz);
     }
 
     public List<QuizSummaryDto> findAllQuizByModuleId(int moduleId) {
         List<Quiz >quizzes=quizRepository.findQuizzesByModule_Id(moduleId);
-        return mapper.toQuizSummaryDtoList(quizzes);
+        return quizMapper.toQuizSummaryDtoList(quizzes);
     }
 
-    public QuizAttempt assignGrade(List<StudentAnswerDto> studentAnswers, Authentication authentication, int quizId) {
-        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
-        User user = userDetails.getUser();
-        if (!(user instanceof Student student)) {
-            throw new RuntimeException("User is not a student");
-        }
-        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new RuntimeException("Quiz not found"));
+    public QuizAttemptDto assignGrade(List<StudentAnswerDto> studentAnswers, Authentication authentication, int quizId) {
+        Student student= studentService.getStudentFromUser(authentication);
+
+        Quiz quiz = quizRepository.findById(quizId).
+            orElseThrow(() -> new ResourceNotFoundException("quiz not found"));
 
         QuizAttempt quizAttempt = new QuizAttempt();
         quizAttempt.setStudent(student);
         quizAttempt.setQuiz(quiz);
         quizAttempt.setAttemptNumber(getNextAttemptNumber(student, quiz));
 
-        List<QuizAttemptAnswer> attemptAnswers = studentAnswers.stream().map(studentAnswer -> {
-            Question question = quiz.getQuestions().stream()
-                .filter(q -> q.getId() == studentAnswer.getQuestionId())
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Question not found"));
-
-            Answer answer = question.getAnswers().stream()
-                .filter(a -> a.getId() == studentAnswer.getAnswerId())
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Answer not found"));
-
-            boolean isCorrect = answer.isCorrect();
-
-            QuizAttemptAnswer attemptAnswer = new QuizAttemptAnswer();
-            attemptAnswer.setQuestion(question);
-            attemptAnswer.setAnswer(answer);
-            attemptAnswer.setCorrect(isCorrect);
-            return attemptAnswer;
-        }).collect(Collectors.toList());
+        List<QuizAttemptAnswer> attemptAnswers = mapStudentAnswersToAttempt(studentAnswers, quiz);
 
         quizAttempt.setScore(calculateScore(attemptAnswers, quiz));
         quizAttemptRepository.save(quizAttempt);
@@ -98,8 +80,10 @@ public class QuizService {
             attemptAnswer.setQuizAttempt(quizAttempt);
             attemptAnswerRepository.save(attemptAnswer);
         }
-        return quizAttempt;
+
+        return quizAttemptMapper.toQuizAttemptDto(quizAttempt);
     }
+
 
     private int getNextAttemptNumber(Student student, Quiz quiz) {
         List<QuizAttempt> attempts = quizAttemptRepository.findByStudentAndQuiz(student, quiz);
@@ -119,4 +103,34 @@ public class QuizService {
         return (double) correctAnswers / totalQuestions * 100;
     }
 
+    private List<QuizAttemptAnswer> mapStudentAnswersToAttempt(List<StudentAnswerDto> studentAnswers, Quiz quiz) {
+        return studentAnswers.stream()
+            .map(studentAnswer -> {
+                Question question = quiz.getQuestions().stream()
+                    .filter(q -> q.getId() == studentAnswer.getQuestionId())
+                    .findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+
+                Answer answer = question.getAnswers().stream()
+                    .filter(a -> a.getId() == studentAnswer.getAnswerId())
+                    .findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException("Answer not found"));
+
+                return createAttemptAnswer(question, answer);
+            })
+            .collect(Collectors.toList());
+    }
+    private QuizAttemptAnswer createAttemptAnswer(Question question, Answer answer) {
+        QuizAttemptAnswer attemptAnswer = new QuizAttemptAnswer();
+        attemptAnswer.setQuestion(question);
+        attemptAnswer.setAnswer(answer);
+        attemptAnswer.setCorrect(answer.isCorrect());
+        return attemptAnswer;
+    }
+
+    public void delete(int quizId) {
+        Quiz quiz = quizRepository.findById(quizId)
+            .orElseThrow(() -> new ResourceNotFoundException("quiz not found"));
+        quizRepository.delete(quiz);
+    }
 }

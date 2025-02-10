@@ -1,7 +1,7 @@
-package kz.sayat.diploma_backend.auth_module.security.config;
+package kz.sayat.diploma_backend.util.config;
 
-import kz.sayat.diploma_backend.auth_module.exceptions.CustomAuthenticationEntryPoint;
-import kz.sayat.diploma_backend.auth_module.security.MyUserDetailsService;
+import kz.sayat.diploma_backend.auth_module.service.MyUserDetailsService;
+import kz.sayat.diploma_backend.util.exceptions.global.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

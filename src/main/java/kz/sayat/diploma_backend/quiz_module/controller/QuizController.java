@@ -14,47 +14,35 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/courses/modules")
+@RequestMapping("api/modules")
 @RequiredArgsConstructor
 public class QuizController {
 
     private final QuizService quizService;
 
     @PostMapping("/{moduleId}/quizzes")
-    private ResponseEntity<QuizDto> createQuiz(@RequestBody QuizDto dto,
+    public ResponseEntity<QuizDto> createQuiz(@RequestBody QuizDto dto,
                                                 @PathVariable(name = "moduleId") int moduleId) {
-        dto.setModuleId(moduleId);
-        Quiz createdQuiz = quizService.createQuiz(dto);
-        dto.setId(createdQuiz.getId());
-        return ResponseEntity.status(201).body(dto);
+        return ResponseEntity.status(201).body(quizService.createQuiz(dto, moduleId));
     }
 
     @GetMapping("/quizzes/{quizId}")
-    private ResponseEntity<QuizDto> getQuiz(@PathVariable(name = "quizId") int quizId) {
-
+    public ResponseEntity<QuizDto> getQuiz(@PathVariable(name = "quizId") int quizId) {
        return ResponseEntity.ok().body( quizService.findQuiz(quizId));
     }
 
 
-    @PostMapping("/{quizId}/submit")
+    @PostMapping("/quizzes/{quizId}/submit")
     public ResponseEntity<QuizAttemptDto> submitQuiz(@PathVariable(name = "quizId") int quizId,
                                                   @RequestBody List<StudentAnswerDto> attemptAnswers,
                                                   Authentication authentication) {
-        QuizAttempt quizAttempt = quizService.assignGrade(attemptAnswers, authentication, quizId);
-
-        QuizAttemptDto quizAttemptDto = new QuizAttemptDto(
-            quizAttempt.getId(),
-            quizAttempt.getStudent().getId(),
-            quizAttempt.getQuiz().getId(),
-            quizAttempt.getAttemptNumber(),
-            quizAttempt.getScore()
-        );
-
-        return ResponseEntity.ok(quizAttemptDto);
+        return ResponseEntity.ok(quizService.assignGrade(attemptAnswers, authentication, quizId));
     }
 
-
-
+    @DeleteMapping("/quizzes/{quizId}")
+    public void deleteQuiz(@PathVariable(name = "quizId") int quizId) {
+        quizService.delete(quizId);
+    }
 
 
 }

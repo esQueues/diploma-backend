@@ -1,14 +1,12 @@
 package kz.sayat.diploma_backend.auth_module.service;
 
 import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
-import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
-import kz.sayat.diploma_backend.auth_module.exceptions.UnauthorizedException;
+import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
 import kz.sayat.diploma_backend.auth_module.mapper.StudentMapper;
 import kz.sayat.diploma_backend.auth_module.models.Student;
-import kz.sayat.diploma_backend.auth_module.models.Teacher;
 import kz.sayat.diploma_backend.auth_module.models.User;
 import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
-import kz.sayat.diploma_backend.auth_module.security.MyUserDetails;
+import kz.sayat.diploma_backend.auth_module.models.MyUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -66,7 +64,7 @@ public class StudentService {
         return studentMapper.toStudentDtoList(students);
     }
 
-    private Student getStudentFromUser(Authentication authentication){
+    public Student getStudentFromUser(Authentication authentication){
         if(!authentication.isAuthenticated()){
             throw new UnauthorizedException("User is not authenticated");
         }

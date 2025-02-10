@@ -17,7 +17,7 @@ public class StudentDto {
     private String email;
     private String firstname;
     private String lastname;
-    int gradeLevel;
+    String gradeLevel;
     String schoolInfo;
     LocalDate birthday;
     List<CourseSummaryDto> enrolledCourses;

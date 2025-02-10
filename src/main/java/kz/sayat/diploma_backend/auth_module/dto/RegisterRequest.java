@@ -23,7 +23,7 @@ public record RegisterRequest(
 
     String bio,
 
-    int gradeLevel,
+    String gradeLevel,
     String schoolInfo,
     LocalDate birthDate
 ) {}

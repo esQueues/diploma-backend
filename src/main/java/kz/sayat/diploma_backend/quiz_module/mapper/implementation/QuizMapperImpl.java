@@ -1,6 +1,7 @@
 package kz.sayat.diploma_backend.quiz_module.mapper.implementation;
 
 import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
+import kz.sayat.diploma_backend.course_module.models.Module;
 import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuestionMapper;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuizMapper;
@@ -18,13 +19,13 @@ public class QuizMapperImpl implements QuizMapper {
     private final QuestionMapper  questionMapper;
 
     @Override
-    public Quiz toQuiz(QuizDto dto) {
+    public Quiz toQuiz(QuizDto dto, Module module) {
         if(dto == null) {
             return null;
         }
         Quiz quiz = new Quiz();
-        quiz.setId(dto.getId());
         quiz.setTitle(dto.getTitle());
+        quiz.setModule(module);
         return quiz;
     }
 
@@ -37,7 +38,10 @@ public class QuizMapperImpl implements QuizMapper {
         quizDto.setId(quiz.getId());
         quizDto.setTitle(quiz.getTitle());
         quizDto.setModuleId(quiz.getModule().getId());
-        quizDto.setQuestions(questionMapper.toDtoList(quiz.getQuestions()));
+        quizDto.setQuestions(quiz.getQuestions() != null
+            ? questionMapper.toDtoList(quiz.getQuestions())
+            : List.of());
+
         return quizDto;
     }
 

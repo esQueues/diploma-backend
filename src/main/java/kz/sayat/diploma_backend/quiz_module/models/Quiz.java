@@ -24,6 +24,6 @@ public class Quiz {
     @JoinColumn(name = "module_id", nullable = false)
     private Module module;
 
-    @OneToMany(mappedBy = "quiz")
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.REMOVE)
     private List<Question> questions;
 }

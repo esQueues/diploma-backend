@@ -30,7 +30,7 @@ public class QuizAttempt {
 
     private double score;
 
-    @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.REMOVE)
     private List<QuizAttemptAnswer> attemptAnswers;
 
     @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
