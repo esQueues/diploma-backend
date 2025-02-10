@@ -1,17 +1,27 @@
 package kz.sayat.diploma_backend.auth_module.service;
 
+import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
+import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
+import kz.sayat.diploma_backend.auth_module.exceptions.UnauthorizedException;
+import kz.sayat.diploma_backend.auth_module.mapper.StudentMapper;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.models.Teacher;
+import kz.sayat.diploma_backend.auth_module.models.User;
 import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
+import kz.sayat.diploma_backend.auth_module.security.MyUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final StudentMapper studentMapper;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     public void save(Student student) {
@@ -19,4 +29,52 @@ public class StudentService {
         studentRepository.save(student);
     }
 
+    public StudentDto getProfile(Authentication authentication) {
+        Student student = getStudentFromUser(authentication);
+        return studentMapper.toStudentDto(student);
+    }
+
+    public StudentDto getById(int id) {
+        Student student = studentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+        return studentMapper.toStudentDto(student);
+    }
+
+    public StudentDto updateStudent(Authentication authentication, StudentDto studentDto) {
+        Student student = getStudentFromUser(authentication);
+        student.setEmail(studentDto.getEmail());
+        student.setBirthDate(studentDto.getBirthday());
+        student.setGradeLevel(studentDto.getGradeLevel());
+        student.setFirstname(studentDto.getFirstname());
+        student.setLastname(studentDto.getLastname());
+        student.setSchoolInfo(studentDto.getSchoolInfo());
+
+        studentRepository.save(student);
+
+        return studentMapper.toStudentDto(student);
+    }
+
+    public void deleteStudent(int id) {
+        Student student = studentRepository.findById(id).orElseThrow(() ->
+            new RuntimeException("Student not found"));
+        studentRepository.delete(student);
+    }
+
+    public List<StudentDto> getAllStudents() {
+        List<Student>students = studentRepository.findAll();
+
+        return studentMapper.toStudentDtoList(students);
+    }
+
+    private Student getStudentFromUser(Authentication authentication){
+        if(!authentication.isAuthenticated()){
+            throw new UnauthorizedException("User is not authenticated");
+        }
+        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (!(user instanceof Student student)) {
+            throw new RuntimeException("User is not a student");
+        }
+        return student;
+    }
 }

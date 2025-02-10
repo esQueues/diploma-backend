@@ -4,8 +4,11 @@ import kz.sayat.diploma_backend.quiz_module.dto.QuestionDto;
 import kz.sayat.diploma_backend.quiz_module.models.Question;
 import kz.sayat.diploma_backend.quiz_module.service.QuestionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/quiz")
@@ -16,18 +19,37 @@ public class QuestionController {
 
     @PostMapping("/{quizId}/question")
     public ResponseEntity<QuestionDto> createQuestion(@RequestBody QuestionDto dto,
-                                                   @PathVariable(name = "quizId") int quizId) {
-        dto.setQuizId(quizId);
-        Question savedQuestion = questionService.createQuestion(dto);
-        dto.setId(savedQuestion.getId());
-        savedQuestion.getAnswers().forEach(savedAnswer ->
-            dto.getAnswers().stream()
-                .filter(answerDto -> answerDto.getAnswerText().equals(savedAnswer.getAnswerText()))
-                .findFirst()
-                .ifPresent(answerDto -> answerDto.setId(savedAnswer.getId()))
-        );
-        return ResponseEntity.ok(dto);
+                                                      @PathVariable(name = "quizId") int quizId) {
+        return ResponseEntity.ok(questionService.createQuestion(dto,quizId));
     }
 
+    @PostMapping("/{quizId}/questions")
+    public ResponseEntity<List<QuestionDto>> createQuestions(@RequestBody List<QuestionDto> dtos,
+                                                             @PathVariable(name = "quizId") int quizId) {
+        return ResponseEntity.ok(questionService.createQuestions(dtos, quizId));
+    }
+
+//    @PutMapping("/question/{questionId}")
+//    public ResponseEntity<QuestionDto> updateQuestion(@PathVariable int questionId,
+//                                                      @RequestBody QuestionDto dto) {
+//        return ResponseEntity.ok(questionService.updateQuestion(questionId, dto));
+//    }
+//
+//
+//    @GetMapping("/question/{questionId}")
+//    public ResponseEntity<QuestionDto> getQuestionById(@PathVariable int questionId) {
+//        return ResponseEntity.ok(questionService.getQuestionById(questionId));
+//    }
+//
+//    @GetMapping("/{quizId}/questions")
+//    public ResponseEntity<List<QuestionDto>> getQuestionsByQuiz(@PathVariable int quizId) {
+//        return ResponseEntity.ok(questionService.getQuestionsByQuizId(quizId));
+//    }
+//
+//    @DeleteMapping("/question/{questionId}")
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+//    public void deleteQuestion(@PathVariable int questionId) {
+//        questionService.deleteQuestion(questionId);
+//    }
 
 }

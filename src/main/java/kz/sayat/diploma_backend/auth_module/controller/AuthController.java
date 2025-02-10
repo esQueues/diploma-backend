@@ -18,23 +18,22 @@ public class AuthController {
 
     private final AuthService authService;
 
-
     @PostMapping("/login")
-    public ResponseEntity<?> login(HttpServletRequest request, HttpServletResponse response, @RequestBody LoginRequest authRequest) {
+    @ResponseStatus(HttpStatus.OK)
+    public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody LoginRequest authRequest) {
         authService.login(request, response, authRequest);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest registerRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void register(@RequestBody @Valid RegisterRequest registerRequest) {
         authService.register(registerRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/register/teacher")
-    public ResponseEntity<?> registerTeacher(@RequestBody @Valid RegisterRequest registerRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void registerTeacher(@RequestBody @Valid RegisterRequest registerRequest) {
         authService.registerTeacher(registerRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }

@@ -17,7 +17,7 @@ public class Teacher extends User {
     private String bio;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Course> createdCourses;
 
 }

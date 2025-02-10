@@ -4,6 +4,7 @@ import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.models.User;
 import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
 import kz.sayat.diploma_backend.auth_module.security.MyUserDetails;
+import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
 import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
 import kz.sayat.diploma_backend.quiz_module.dto.StudentAnswerDto;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuizMapper;
@@ -52,9 +53,9 @@ public class QuizService {
         return mapper.toQuizDto(quiz);
     }
 
-    public List<QuizDto> findAllQuizByModuleId(int moduleId) {
+    public List<QuizSummaryDto> findAllQuizByModuleId(int moduleId) {
         List<Quiz >quizzes=quizRepository.findQuizzesByModule_Id(moduleId);
-        return mapper.toQuizDtoList(quizzes);
+        return mapper.toQuizSummaryDtoList(quizzes);
     }
 
     public QuizAttempt assignGrade(List<StudentAnswerDto> studentAnswers, Authentication authentication, int quizId) {
@@ -117,44 +118,5 @@ public class QuizService {
 
         return (double) correctAnswers / totalQuestions * 100;
     }
-
-    public String generatePrompt(int attemptId) {
-        // Fetch the quiz attempt from the database
-        QuizAttempt quizAttempt = quizAttemptRepository.findById(attemptId)
-            .orElseThrow(() -> new NoSuchElementException("Quiz attempt not found for ID: " + attemptId));
-
-        // Build a structured prompt with meaningful details
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Quiz Attempt Summary:\n");
-        prompt.append("Student: ").append(quizAttempt.getStudent().getFirstname()).append("\n");
-        prompt.append("Quiz Title: ").append(quizAttempt.getQuiz().getTitle()).append("\n");
-        prompt.append("Attempt Number: ").append(quizAttempt.getAttemptNumber()).append("\n");
-        prompt.append("Score: ").append(quizAttempt.getScore()).append("/100\n\n");
-
-
-        prompt.append("Answers:\n");
-        for (QuizAttemptAnswer attemptAnswer : quizAttempt.getAttemptAnswers()) {
-            Question question = attemptAnswer.getQuestion();
-
-            // Find the correct answer (assuming there's a method in Answer entity to check if it's correct)
-            String correctAnswerText = question.getAnswers().stream()
-                .filter(Answer::isCorrect)  // Assuming you have a boolean field `isCorrect` in `Answer`
-                .map(Answer::getAnswerText)
-                .findFirst()
-                .orElse("No correct answer found");
-
-            prompt.append("- Question: ").append(question.getQuestionText()).append("\n");
-            prompt.append("  Your Answer: ").append(attemptAnswer.getAnswer().getAnswerText()).append("\n");
-            prompt.append("  Correct Answer: ").append(correctAnswerText).append("\n");
-            prompt.append("  Result: ").append(attemptAnswer.isCorrect() ? "✅ Correct" : "❌ Incorrect").append("\n\n");
-        }
-
-        prompt.append("Provide detailed feedback on this quiz attempt. Highlight strengths, common mistakes, and suggest improvements.");
-
-        return prompt.toString();
-    }
-
-
-
 
 }

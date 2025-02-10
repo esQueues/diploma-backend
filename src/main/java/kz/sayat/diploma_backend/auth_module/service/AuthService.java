@@ -6,13 +6,11 @@ import kz.sayat.diploma_backend.auth_module.exceptions.AuthException;
 
 import kz.sayat.diploma_backend.auth_module.mapper.StudentMapper;
 import kz.sayat.diploma_backend.auth_module.mapper.TeacherMapper;
-import kz.sayat.diploma_backend.auth_module.mapper.UserMapper;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.models.Teacher;
-import kz.sayat.diploma_backend.auth_module.models.User;
-import kz.sayat.diploma_backend.auth_module.models.enums.UserRole;
 import kz.sayat.diploma_backend.auth_module.dto.LoginRequest;
 import kz.sayat.diploma_backend.auth_module.dto.RegisterRequest;
+import kz.sayat.diploma_backend.auth_module.repository.UserRepository;
 import lombok.AllArgsConstructor;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,15 +28,14 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class AuthService {
 
-    private final UserService userService;
     private final TeacherService teacherService;
     private final TeacherMapper teacherMapper;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
-    private final UserMapper userMapper;
     private final StudentMapper studentMapper;
     private final StudentService studentService;
+    private final UserRepository  userRepository;
 
 
     public void login(HttpServletRequest request, HttpServletResponse response, LoginRequest authRequest) {
@@ -51,7 +48,7 @@ public class AuthService {
 
     public void register(RegisterRequest request){
 
-        if(userService.isEmailExist(request.email())){
+        if(isEmailExist(request.email())){
             throw new AuthException("Email already exists");
         }
 
@@ -63,7 +60,7 @@ public class AuthService {
 
 
     public void registerTeacher(RegisterRequest request){
-        if(userService.isEmailExist(request.email())){
+        if(isEmailExist(request.email())){
             throw new AuthException("Email already exists");
         }
         Teacher teacher = teacherMapper.toTeacher(request);
@@ -81,5 +78,8 @@ public class AuthService {
         this.securityContextRepository.saveContext(context,request,response);
     }
 
+    private boolean isEmailExist(String email) {
+        return userRepository.existsByEmail(email);
+    }
 
 }

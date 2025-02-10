@@ -3,6 +3,7 @@ package kz.sayat.diploma_backend.course_module.service;
 
 import kz.sayat.diploma_backend.course_module.dto.LectureDto;
 import kz.sayat.diploma_backend.course_module.dto.ModuleDto;
+import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
 import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
 import kz.sayat.diploma_backend.course_module.mapper.ModuleMapper;
 import kz.sayat.diploma_backend.course_module.models.Course;
@@ -38,7 +39,7 @@ public class ModuleService {
         Module module= moduleRepository.findById(id).orElseThrow(()
             -> new NoSuchElementException("Module with ID " + id + " not found"));
 
-        List<QuizDto> quizzes = quizService.findAllQuizByModuleId(id);
+        List<QuizSummaryDto> quizzes = quizService.findAllQuizByModuleId(id);
         List<LectureDto> lectures = lectureService.findAllLecturesByModuleId(id);
 
         ModuleDto dto = mapper.toModuleDto(module);

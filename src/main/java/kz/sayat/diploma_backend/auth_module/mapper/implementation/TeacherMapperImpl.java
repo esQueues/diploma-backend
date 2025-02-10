@@ -6,10 +6,18 @@ import kz.sayat.diploma_backend.auth_module.mapper.TeacherMapper;
 import kz.sayat.diploma_backend.auth_module.models.Teacher;
 import kz.sayat.diploma_backend.auth_module.models.enums.UserRole;
 import kz.sayat.diploma_backend.auth_module.dto.RegisterRequest;
+import kz.sayat.diploma_backend.course_module.mapper.CourseMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
+@RequiredArgsConstructor
 public class TeacherMapperImpl implements TeacherMapper {
+
+    private final CourseMapper courseMapper;
 
     @Override
     public Teacher toTeacher(TeacherDto teacherDto) {
@@ -39,6 +47,7 @@ public class TeacherMapperImpl implements TeacherMapper {
         teacherDto.setFirstname(teacher.getFirstname());
         teacherDto.setLastname(teacher.getLastname());
         teacherDto.setBio(teacher.getBio());
+        teacherDto.setCreatedCourses(courseMapper.toCourseSummaryDtoList(teacher.getCreatedCourses()));
 
         return teacherDto;
     }
@@ -58,6 +67,13 @@ public class TeacherMapperImpl implements TeacherMapper {
         teacher.setBio(registerRequest.bio());
 
         return teacher;
+    }
+
+    @Override
+    public List<TeacherDto> toTeacherDtoList(List<Teacher> teachers) {
+        return teachers.stream().map(
+            this::toTeacherDto
+        ).collect(Collectors.toList());
     }
 
 }

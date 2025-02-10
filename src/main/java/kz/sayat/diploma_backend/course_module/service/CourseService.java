@@ -31,6 +31,7 @@ public class CourseService {
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final CourseMapper courseMapper;
 
 
     public Course createCourse(CourseDto dto, Authentication authentication) {
@@ -50,6 +51,7 @@ public class CourseService {
     public CourseDto findCourseById(int id) {
         Course course = courseRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+
 
         return mapper.toCourseDto(course);
     }
@@ -71,6 +73,18 @@ public class CourseService {
             courseRepository.save(course);
             studentRepository.save(student);
         }
+    }
+
+    public List<CourseDto> getMyCourses(Authentication authentication) {
+        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        if (!(user instanceof Student student)) {
+            throw new RuntimeException("User is not a student");
+        }
+        studentRepository.findById(user.getId());
+
+        List<Course> courses = student.getCourses();
+        return courseMapper.toCourseDtoList(courses);
     }
 
 }

@@ -1,5 +1,6 @@
 package kz.sayat.diploma_backend.quiz_module.mapper.implementation;
 
+import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
 import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuestionMapper;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuizMapper;
@@ -44,6 +45,25 @@ public class QuizMapperImpl implements QuizMapper {
     public List<QuizDto> toQuizDtoList(List<Quiz> quizList) {
         return quizList.stream().
             map(this::toQuizDto).
+            collect(Collectors.toList());
+    }
+
+    @Override
+    public QuizSummaryDto toQuizSummaryDto(Quiz quiz) {
+        if(quiz == null) {
+            return null;
+        }
+        QuizSummaryDto quizSummaryDto = new QuizSummaryDto();
+        quizSummaryDto.setId(quiz.getId());
+        quizSummaryDto.setTitle(quiz.getTitle());
+        quizSummaryDto.setModuleId(quiz.getModule().getId());
+        return quizSummaryDto;
+    }
+
+    @Override
+    public List<QuizSummaryDto> toQuizSummaryDtoList(List<Quiz> quizzes) {
+        return quizzes.stream().
+            map(this::toQuizSummaryDto).
             collect(Collectors.toList());
     }
 }

@@ -1,11 +1,23 @@
 package kz.sayat.diploma_backend.course_module.mapper.implementation;
 import kz.sayat.diploma_backend.course_module.dto.CourseDto;
+import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
 import kz.sayat.diploma_backend.course_module.mapper.CourseMapper;
+import kz.sayat.diploma_backend.course_module.mapper.ModuleMapper;
 import kz.sayat.diploma_backend.course_module.models.Course;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
+@RequiredArgsConstructor
 public class CourseMapperImpl implements CourseMapper {
+
+
+    private final ModuleMapper moduleMapper;
+
 
     @Override
     public Course toCourse(CourseDto courseDto) {
@@ -31,8 +43,35 @@ public class CourseMapperImpl implements CourseMapper {
         courseDto.setId(course.getId());
         courseDto.setTitle(course.getTitle());
         courseDto.setDescription(course.getDescription());
+        courseDto.setModules(moduleMapper.toModuleDtoList(course.getModules()));
 
         return courseDto;
+    }
+
+    @Override
+    public List<CourseDto> toCourseDtoList(List<Course> courseList) {
+        return courseList.stream().map(
+            this ::toCourseDto)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public CourseSummaryDto toCourseSummaryDto(Course course) {
+        if(course == null) {
+            return null;
+        }
+        CourseSummaryDto courseSummaryDto = new CourseSummaryDto();
+        courseSummaryDto.setId(course.getId());
+        courseSummaryDto.setTitle(course.getTitle());
+
+        return courseSummaryDto;
+    }
+
+    @Override
+    public List<CourseSummaryDto> toCourseSummaryDtoList(List<Course> courseList) {
+        return courseList.stream().map(
+            this::toCourseSummaryDto
+        ).collect(Collectors.toList());
     }
 
 }

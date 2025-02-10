@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/courses")
 @RequiredArgsConstructor
@@ -34,5 +36,10 @@ public class CourseController {
         return ResponseEntity.ok("Student enrolled to course!");
     }
 
+    @GetMapping("/my-courses")
+    public ResponseEntity<List<CourseDto>> getCoursesOfStudent(Authentication authentication) {
+
+        return ResponseEntity.ok(courseService.getMyCourses(authentication));
+    }
 
 }
