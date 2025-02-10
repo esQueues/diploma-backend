@@ -4,13 +4,12 @@ package kz.sayat.diploma_backend.course_module.service;
 import kz.sayat.diploma_backend.course_module.dto.LectureDto;
 import kz.sayat.diploma_backend.course_module.dto.ModuleDto;
 import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
-import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
 import kz.sayat.diploma_backend.course_module.mapper.ModuleMapper;
 import kz.sayat.diploma_backend.course_module.models.Course;
 import kz.sayat.diploma_backend.course_module.models.Module;
 import kz.sayat.diploma_backend.course_module.repository.CourseRepository;
 import kz.sayat.diploma_backend.course_module.repository.ModuleRepository;
-import kz.sayat.diploma_backend.quiz_module.service.QuizService;
+import kz.sayat.diploma_backend.quiz_module.service.implementation.QuizServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,7 @@ public class ModuleService {
     private final ModuleRepository moduleRepository;
     private final ModuleMapper mapper;
     private final CourseRepository courseRepository;
-    private final QuizService quizService;
+    private final QuizServiceImpl quizService;
     private final LectureService lectureService;
 
     public Module createModule(ModuleDto dto) {

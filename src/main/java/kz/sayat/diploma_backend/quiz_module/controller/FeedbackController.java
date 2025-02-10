@@ -1,5 +1,6 @@
 package kz.sayat.diploma_backend.quiz_module.controller;
 
+
 import kz.sayat.diploma_backend.quiz_module.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class FeedbackController {
 
     @GetMapping("/{attemptId}")
     public ResponseEntity<String> getFeedback(@PathVariable(name = "attemptId") int attemptId,
-                                              Authentication authentication) throws AccessDeniedException {
+                                              Authentication authentication){
         return ResponseEntity.ok(feedbackService.getFeedbackOfStudent(attemptId,authentication));
     }
 

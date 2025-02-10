@@ -1,7 +1,6 @@
 package kz.sayat.diploma_backend.quiz_module.controller;
 
 import kz.sayat.diploma_backend.quiz_module.dto.QuestionDto;
-import kz.sayat.diploma_backend.quiz_module.models.Question;
 import kz.sayat.diploma_backend.quiz_module.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

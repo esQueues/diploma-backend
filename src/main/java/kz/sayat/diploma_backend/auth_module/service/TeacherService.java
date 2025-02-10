@@ -2,6 +2,7 @@ package kz.sayat.diploma_backend.auth_module.service;
 
 import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
+import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
 import kz.sayat.diploma_backend.auth_module.mapper.TeacherMapper;
 import kz.sayat.diploma_backend.auth_module.models.Teacher;
@@ -12,25 +13,22 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
+@Transactional
 @AllArgsConstructor
 public class TeacherService {
+
     private final TeacherRepository teacherRepository;
     private final TeacherMapper teacherMapper;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-
-
 
     public void save(Teacher teacher){
         teacher.setPassword(encoder.encode(teacher.getPassword()));
         teacherRepository.save(teacher);
     }
 
-    @Transactional
     public TeacherDto getProfile(Authentication authentication) {
         return  teacherMapper.toTeacherDto(getTeacherFromUser(authentication));
     }
@@ -47,18 +45,16 @@ public class TeacherService {
     }
 
 
-
-
     public void deleteTeacher(int id) {
         Teacher teacher = teacherRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("Teacher not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
 
         teacherRepository.delete(teacher);
     }
 
     public TeacherDto getTeacherById(int id) {
         Teacher teacher=teacherRepository.findById(id).
-            orElseThrow(() -> new NoSuchElementException("Teacher not found"));
+            orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
         return teacherMapper.toTeacherDto(teacher);
     }
 
@@ -67,7 +63,7 @@ public class TeacherService {
         return teacherMapper.toTeacherDtoList(teachers);
     }
 
-    private Teacher getTeacherFromUser(Authentication authentication){
+    public Teacher getTeacherFromUser(Authentication authentication){
         if(!authentication.isAuthenticated()){
             throw new UnauthorizedException("User is not authenticated");
         }
