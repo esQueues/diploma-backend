@@ -1,7 +1,6 @@
-package kz.sayat.diploma_backend.auth_module.service;
+package kz.sayat.diploma_backend.auth_module.security;
 
 import jakarta.transaction.Transactional;
-import kz.sayat.diploma_backend.auth_module.models.MyUserDetails;
 import kz.sayat.diploma_backend.auth_module.models.User;
 import kz.sayat.diploma_backend.auth_module.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

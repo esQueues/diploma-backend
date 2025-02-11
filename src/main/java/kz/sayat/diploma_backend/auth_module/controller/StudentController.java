@@ -1,8 +1,6 @@
 package kz.sayat.diploma_backend.auth_module.controller;
 
 import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
-import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
-import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
