@@ -39,6 +39,8 @@ public class QuizServiceImpl implements QuizService {
     private final StudentService studentService;
     private final QuizMapper quizMapper;
 
+
+
     public QuizDto createQuiz(QuizDto dto, int moduleId) {
 
         Module module = moduleRepository.findById(moduleId).
@@ -90,6 +92,16 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new ResourceNotFoundException("quiz not found"));
         quizRepository.delete(quiz);
+    }
+
+    @Override
+    public QuizAttemptDto getAttempt(int quizId, Authentication authentication) {
+        Student student = studentService.getStudentFromUser(authentication);
+        Quiz quiz= quizRepository.findById(quizId)
+                .orElseThrow(()-> new ResourceNotFoundException("quiz not found"));
+        QuizAttempt attempt = quizAttemptRepository
+            .findTopByStudentAndQuizOrderByAttemptNumberDesc(student, quiz);
+        return quizAttemptMapper.toQuizAttemptDto(attempt);
     }
 
     private int getNextAttemptNumber(Student student, Quiz quiz) {

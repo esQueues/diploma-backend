@@ -24,10 +24,10 @@ public class Module {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @OneToMany(mappedBy = "module", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Lecture> lectures;
 
-    @OneToMany(mappedBy = "module", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Quiz> quizzes;
 
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/teacher")
+@RequestMapping("/api/teachers")
 @RequiredArgsConstructor
 public class TeacherController {
 
@@ -41,7 +41,7 @@ public class TeacherController {
         teacherService.deleteTeacher(id);
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<TeacherDto>> getAllTeachers() {
         List<TeacherDto> teachers = teacherService.getAllTeachers();
         return ResponseEntity.ok(teachers);

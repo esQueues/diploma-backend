@@ -12,5 +12,6 @@ import java.util.List;
 public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Integer> {
 
     List<QuizAttempt> findByStudentAndQuiz(Student student, Quiz quiz);
+    QuizAttempt findTopByStudentAndQuizOrderByAttemptNumberDesc(Student student, Quiz quiz);
 
 }

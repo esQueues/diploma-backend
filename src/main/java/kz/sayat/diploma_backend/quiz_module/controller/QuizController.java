@@ -18,6 +18,11 @@ public class QuizController {
 
     private final QuizService quizService;
 
+    @GetMapping("/quizzes/{quizId}/attempt")
+    public ResponseEntity<QuizAttemptDto> getQuizAttempt(@PathVariable(name = "quizId") int quizId, Authentication authentication) {
+        return ResponseEntity.ok(quizService.getAttempt(quizId,authentication));
+    }
+
     @PostMapping("/{moduleId}/quizzes")
     public ResponseEntity<QuizDto> createQuiz(@RequestBody QuizDto dto,
                                                 @PathVariable(name = "moduleId") int moduleId) {

@@ -1,4 +1,6 @@
 package kz.sayat.diploma_backend.course_module.mapper.implementation;
+import kz.sayat.diploma_backend.auth_module.mapper.TeacherMapper;
+import kz.sayat.diploma_backend.auth_module.mapper.implementation.TeacherMapperHelper;
 import kz.sayat.diploma_backend.course_module.dto.CourseDto;
 import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
 import kz.sayat.diploma_backend.course_module.mapper.CourseMapper;
@@ -17,6 +19,7 @@ public class CourseMapperImpl implements CourseMapper {
 
 
     private final ModuleMapper moduleMapper;
+    private final TeacherMapperHelper teacherMapper;
 
 
     @Override
@@ -44,6 +47,7 @@ public class CourseMapperImpl implements CourseMapper {
         courseDto.setTitle(course.getTitle());
         courseDto.setDescription(course.getDescription());
         courseDto.setModules(moduleMapper.toModuleDtoList(course.getModules()));
+        courseDto.setTeacher(teacherMapper.toTeacherDtoWithoutCourses(course.getTeacher()));
 
         return courseDto;
     }
@@ -51,7 +55,7 @@ public class CourseMapperImpl implements CourseMapper {
     @Override
     public List<CourseDto> toCourseDtoList(List<Course> courseList) {
         return courseList.stream().map(
-            this ::toCourseDto)
+                this ::toCourseDto)
             .collect(Collectors.toList());
     }
 
@@ -63,6 +67,7 @@ public class CourseMapperImpl implements CourseMapper {
         CourseSummaryDto courseSummaryDto = new CourseSummaryDto();
         courseSummaryDto.setId(course.getId());
         courseSummaryDto.setTitle(course.getTitle());
+        courseSummaryDto.setTeacher(teacherMapper.toTeacherDtoWithoutCourses(course.getTeacher()));
 
         return courseSummaryDto;
     }

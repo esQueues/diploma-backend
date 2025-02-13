@@ -1,5 +1,6 @@
 package kz.sayat.diploma_backend.auth_module.service.implementation;
 
+import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 

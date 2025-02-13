@@ -8,6 +8,7 @@ import kz.sayat.diploma_backend.auth_module.models.enums.UserRole;
 import kz.sayat.diploma_backend.auth_module.dto.RegisterRequest;
 import kz.sayat.diploma_backend.course_module.mapper.CourseMapper;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class TeacherMapperImpl implements TeacherMapper {
 
         return teacher;
     }
+
 
     @Override
     public TeacherDto toTeacherDto(Teacher teacher) {

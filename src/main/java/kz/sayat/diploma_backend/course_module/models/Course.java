@@ -28,10 +28,10 @@ public class Course {
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
 
-    @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Module> modules;
 
-    @ManyToMany(mappedBy = "courses")
+    @ManyToMany(mappedBy = "courses", fetch = FetchType.EAGER)
     private List<Student> students;
 
 }

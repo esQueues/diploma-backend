@@ -4,6 +4,8 @@ package kz.sayat.diploma_backend.course_module.service.implementations;
 import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
+import kz.sayat.diploma_backend.auth_module.service.StudentService;
+import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
 import kz.sayat.diploma_backend.course_module.service.CourseService;
 import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.course_module.dto.CourseDto;
@@ -19,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -27,6 +30,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseMapper mapper;
     private final TeacherRepository teacherRepository;
+    private final StudentService studentService;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
@@ -47,12 +51,29 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public CourseDto findCourseById(int id) {
+    public CourseDto findCourseById(int id, Authentication auth) {
         Course course = courseRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        return mapper.toCourseDto(course);
+        boolean isEnrolled = false; // Default for guests
+
+        // Check enrollment only if the user is authenticated
+        if (auth != null && auth.isAuthenticated()) {
+            Student authenticatedStudent = studentService.getStudentFromUser(auth);
+            isEnrolled = course.getStudents().stream()
+                .anyMatch(student -> student.getId() == (authenticatedStudent.getId()));
+        }
+
+        // Convert to DTO
+        CourseDto courseDto = mapper.toCourseDto(course);
+        courseDto.setEnrolled(isEnrolled);  // Only true if user is authenticated & enrolled
+
+        return courseDto;
     }
+
+
+
+
 
     @Override
     public void enrollCourse(int courseId, Authentication authentication) {
@@ -74,15 +95,19 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDto> getMyCourses(Authentication authentication) {
+    public List<CourseSummaryDto> getMyCourses(Authentication authentication) {
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
         if (!(user instanceof Student student)) {
             throw new RuntimeException("User is not a student");
         }
         studentRepository.findById(user.getId());
+        return courseMapper.toCourseSummaryDtoList(student.getCourses());
+    }
 
-        List<Course> courses = student.getCourses();
+    @Override
+    public List<CourseDto> getAllCourses() {
+        List<Course> courses=courseRepository.findAll();
         return courseMapper.toCourseDtoList(courses);
     }
 

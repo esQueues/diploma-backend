@@ -14,4 +14,6 @@ public interface QuizService {
     List<QuizSummaryDto> findAllQuizByModuleId(int moduleId);
     QuizAttemptDto assignGrade(List<StudentAnswerDto> studentAnswers, Authentication authentication, int quizId);
     void delete(int quizId);
+
+    QuizAttemptDto getAttempt(int quizId, Authentication authentication);
 }
