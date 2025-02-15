@@ -30,6 +30,7 @@ public class LectureMapperImpl implements LectureMapper {
         lectureDto.setId(lecture.getId());
         lectureDto.setTitle(lecture.getTitle());
         lectureDto.setUrl(lecture.getUrl());
+        lectureDto.setCourseId(lecture.getModule().getCourse().getId());
         lectureDto.setModuleId(lecture.getModule().getId());
         return lectureDto;
     }

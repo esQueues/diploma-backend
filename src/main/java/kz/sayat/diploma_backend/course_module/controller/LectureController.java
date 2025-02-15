@@ -18,13 +18,24 @@ public class LectureController {
     @PostMapping("/{moduleId}/lectures")
     public ResponseEntity<LectureDto> createLecture(@RequestBody LectureDto dto, @PathVariable int moduleId) {
         dto.setModuleId(moduleId);
-        Lecture createdLecture = lectureService.createLecture(dto);
-        dto.setId(createdLecture.getId());
-        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+//        Lecture createdLecture = lectureService.createLecture(dto);
+//        dto.setId(createdLecture.getId());
+        return new ResponseEntity<>(lectureService.createLecture(dto), HttpStatus.CREATED);
     }
 
     @GetMapping("/lectures/{id}")
     public ResponseEntity<LectureDto> getLecture(@PathVariable("id") int id) {
         return ResponseEntity.ok().body(lectureService.findLectureById(id));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/lecture/{id}")
+    public void deleteLecture(@PathVariable("id") int id) {
+        lectureService.deleteLecture(id);
+    }
+
+    @PutMapping("/lectures/{id}")
+    public ResponseEntity<LectureDto> editLecture(@PathVariable("id") int id, @RequestBody LectureDto dto) {
+        return ResponseEntity.ok().body(lectureService.editLecture(id,dto));
     }
 }

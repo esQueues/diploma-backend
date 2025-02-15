@@ -6,8 +6,11 @@ import kz.sayat.diploma_backend.course_module.models.Lecture;
 import java.util.List;
 
 public interface LectureService {
-    Lecture createLecture(LectureDto dto);
+    LectureDto createLecture(LectureDto dto);
     LectureDto findLectureById(int id);
     List<LectureDto> findAllLecturesByModuleId(int moduleId);
 
+    void deleteLecture(int id);
+
+    LectureDto editLecture(int id, LectureDto dto);
 }

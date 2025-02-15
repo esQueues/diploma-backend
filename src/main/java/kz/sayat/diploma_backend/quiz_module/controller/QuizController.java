@@ -24,8 +24,11 @@ public class QuizController {
     }
 
     @PostMapping("/{moduleId}/quizzes")
-    public ResponseEntity<QuizDto> createQuiz(@RequestBody QuizDto dto,
-                                                @PathVariable(name = "moduleId") int moduleId) {
+    public ResponseEntity<QuizDto> createQuiz(@PathVariable(name = "moduleId") int moduleId,
+                                              @RequestBody QuizDto dto) {
+        System.out.println(dto.getTitle());
+        System.out.println(dto.getQuestions());
+
         return ResponseEntity.status(201).body(quizService.createQuiz(dto, moduleId));
     }
 
@@ -46,6 +49,11 @@ public class QuizController {
     public void deleteQuiz(@PathVariable(name = "quizId") int quizId) {
         quizService.delete(quizId);
     }
+
+//    @PutMapping("/quizzes/{id}")
+//    public void editQuiz(@PathVariable(name = "id") int quizId, @RequestBody QuizDto dto) {
+//        quizService.update(quizId,dto);
+//    }
 
 
 }

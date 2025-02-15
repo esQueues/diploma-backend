@@ -2,6 +2,7 @@ package kz.sayat.diploma_backend.auth_module.controller;
 
 import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
 import kz.sayat.diploma_backend.auth_module.service.TeacherService;
+import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,11 @@ public class TeacherController {
     public ResponseEntity<List<TeacherDto>> getAllTeachers() {
         List<TeacherDto> teachers = teacherService.getAllTeachers();
         return ResponseEntity.ok(teachers);
+    }
+
+    @GetMapping("/courses")
+    public ResponseEntity<List<CourseSummaryDto>> createdCourses(Authentication authentication) {
+        return ResponseEntity.ok().body(teacherService.getCreatedCourses(authentication));
     }
 
 }

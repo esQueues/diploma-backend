@@ -3,6 +3,9 @@ package kz.sayat.diploma_backend.auth_module.service.implementation;
 import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
 import kz.sayat.diploma_backend.auth_module.service.TeacherService;
+import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
+import kz.sayat.diploma_backend.course_module.mapper.CourseMapper;
+import kz.sayat.diploma_backend.course_module.models.Course;
 import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
 import kz.sayat.diploma_backend.auth_module.mapper.TeacherMapper;
@@ -24,6 +27,7 @@ public class TeacherServiceImpl implements TeacherService {
     private final TeacherRepository teacherRepository;
     private final TeacherMapper teacherMapper;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private final CourseMapper courseMapper;
 
     @Override
     public void save(Teacher teacher){
@@ -80,5 +84,12 @@ public class TeacherServiceImpl implements TeacherService {
             throw new RuntimeException("User is not a student");
         }
         return teacher;
+    }
+
+    @Override
+    public List<CourseSummaryDto> getCreatedCourses(Authentication authentication) {
+        Teacher teacher=getTeacherFromUser(authentication);
+        List<Course> createdCourses= teacher.getCreatedCourses();
+        return courseMapper.toCourseSummaryDtoList(createdCourses);
     }
 }

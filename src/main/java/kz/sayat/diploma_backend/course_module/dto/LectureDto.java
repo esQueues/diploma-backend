@@ -7,5 +7,6 @@ public class LectureDto {
     private int id;
     private String title;
     private String url;
+    private int courseId;
     private int moduleId;
 }

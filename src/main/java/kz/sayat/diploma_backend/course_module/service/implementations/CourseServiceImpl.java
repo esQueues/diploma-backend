@@ -3,8 +3,10 @@ package kz.sayat.diploma_backend.course_module.service.implementations;
 
 import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.models.Student;
+import kz.sayat.diploma_backend.auth_module.models.enums.UserRole;
 import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
+import kz.sayat.diploma_backend.auth_module.service.TeacherService;
 import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
 import kz.sayat.diploma_backend.course_module.service.CourseService;
 import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
@@ -31,6 +33,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseMapper mapper;
     private final TeacherRepository teacherRepository;
     private final StudentService studentService;
+    private final TeacherService teacherService;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
@@ -55,21 +58,30 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        boolean isEnrolled = false; // Default for guests
+        boolean isEnrolled = false;
+        boolean isTeacher = false;
 
-        // Check enrollment only if the user is authenticated
         if (auth != null && auth.isAuthenticated()) {
-            Student authenticatedStudent = studentService.getStudentFromUser(auth);
-            isEnrolled = course.getStudents().stream()
-                .anyMatch(student -> student.getId() == (authenticatedStudent.getId()));
+            MyUserDetails userDetails = (MyUserDetails) auth.getPrincipal();
+            UserRole role = userDetails.getUser().getRole();
+
+            if (role == UserRole.STUDENT) {
+                Student authenticatedStudent = studentService.getStudentFromUser(auth);
+                isEnrolled = course.getStudents().stream()
+                    .anyMatch(student -> student.getId() == authenticatedStudent.getId());
+            } else if (role == UserRole.TEACHER) {
+                Teacher authenticatedTeacher = teacherService.getTeacherFromUser(auth);
+                isTeacher = (course.getTeacher().getId() == authenticatedTeacher.getId());
+            }
         }
 
-        // Convert to DTO
         CourseDto courseDto = mapper.toCourseDto(course);
-        courseDto.setEnrolled(isEnrolled);  // Only true if user is authenticated & enrolled
+        courseDto.setEnrolled(isEnrolled);
+        courseDto.setCreator(isTeacher);
 
         return courseDto;
     }
+
 
 
 
@@ -109,6 +121,11 @@ public class CourseServiceImpl implements CourseService {
     public List<CourseDto> getAllCourses() {
         List<Course> courses=courseRepository.findAll();
         return courseMapper.toCourseDtoList(courses);
+    }
+
+    @Override
+    public void deleteCourse(int id) {
+        courseRepository.deleteById(id);
     }
 
 }

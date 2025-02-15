@@ -2,6 +2,11 @@ package kz.sayat.diploma_backend.auth_module.service.implementation;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kz.sayat.diploma_backend.auth_module.dto.UserDto;
+import kz.sayat.diploma_backend.auth_module.mapper.implementation.UserMapper;
+import kz.sayat.diploma_backend.auth_module.models.User;
+import kz.sayat.diploma_backend.auth_module.models.enums.UserRole;
+import kz.sayat.diploma_backend.auth_module.security.MyUserDetails;
 import kz.sayat.diploma_backend.auth_module.service.AuthService;
 import kz.sayat.diploma_backend.util.exceptions.AuthException;
 
@@ -12,6 +17,7 @@ import kz.sayat.diploma_backend.auth_module.models.Teacher;
 import kz.sayat.diploma_backend.auth_module.dto.LoginRequest;
 import kz.sayat.diploma_backend.auth_module.dto.RegisterRequest;
 import kz.sayat.diploma_backend.auth_module.repository.UserRepository;
+import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
 import lombok.AllArgsConstructor;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,9 +26,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Service
@@ -37,16 +47,27 @@ public class AuthServiceImpl implements AuthService {
     private final StudentMapper studentMapper;
     private final StudentServiceImpl studentService;
     private final UserRepository  userRepository;
+    private final UserMapper userMapper;
 
 
     @Override
-    public void login(HttpServletRequest request, HttpServletResponse response, LoginRequest authRequest) {
-        UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated
-            (authRequest.email(), authRequest.password());
+    public UserDto login(HttpServletRequest request, HttpServletResponse response, LoginRequest authRequest) {
+        UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(
+            authRequest.email(), authRequest.password()
+        );
         authenticate(token, request, response);
 
-        System.out.println(authRequest.email()+"   signed in");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            if (userDetails instanceof MyUserDetails customUserDetails) {
+                User user = customUserDetails.getUser();
+                System.out.println(authRequest.email() + " signed in with role: " + user.getRole());
+                return userMapper.toUserDto(user);
+            }
+        }
+        throw new AuthException("Failed to retrieve user details");
     }
+
 
     @Override
     public void register(RegisterRequest request){
@@ -71,6 +92,18 @@ public class AuthServiceImpl implements AuthService {
 
         teacherService.save(teacher);
         System.out.println(request.email()+"  register (teacher)");
+    }
+
+    @Override
+    public Map<String, String> giveRole(Authentication authentication) {
+        if(!authentication.isAuthenticated()){
+            throw new UnauthorizedException("User is not authenticated");
+        }
+        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        Map<String, String> response = new HashMap<>();
+        response.put("role", user.getRole().toString());
+        return response;
     }
 
     private void authenticate(UsernamePasswordAuthenticationToken token, HttpServletRequest request, HttpServletResponse response) {

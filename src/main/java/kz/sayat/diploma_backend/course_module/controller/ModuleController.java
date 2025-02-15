@@ -40,4 +40,16 @@ public class ModuleController {
         return ResponseEntity.ok().body(lecturesDto);
     }
 
+    @PutMapping("/modules/{moduleId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateModule(@PathVariable(name = "moduleId") int id, @RequestBody ModuleDto dto){
+        moduleService.edit(id, dto);
+    }
+
+    @DeleteMapping("/modules/{moduleId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteModule(@PathVariable("moduleId") int moduleId) {
+        moduleService.delete(moduleId);
+    }
+
 }

@@ -51,4 +51,12 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getMyCourses(authentication));
     }
 
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteCourse(@PathVariable(name = "id") int id) {
+        courseService.deleteCourse(id);
+    }
+
+
+
 }

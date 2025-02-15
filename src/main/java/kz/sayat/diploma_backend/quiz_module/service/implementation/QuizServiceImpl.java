@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import kz.sayat.diploma_backend.auth_module.service.implementation.StudentServiceImpl;
+import kz.sayat.diploma_backend.quiz_module.mapper.QuestionMapper;
 import kz.sayat.diploma_backend.quiz_module.service.QuizService;
 import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
@@ -36,6 +37,7 @@ public class QuizServiceImpl implements QuizService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final AttemptAnswerRepository attemptAnswerRepository;
     private final QuizAttemptMapper quizAttemptMapper;
+    private final QuestionMapper questionMapper;
     private final StudentService studentService;
     private final QuizMapper quizMapper;
 
@@ -47,6 +49,11 @@ public class QuizServiceImpl implements QuizService {
             orElseThrow(() -> new ResourceNotFoundException("module not found"));
         Quiz quiz = quizMapper.toQuiz(dto, module);
 
+//        List<Question> questions = questionMapper.toQuestionList(dto.getQuestions(), quiz);
+
+        for (Question question : quiz.getQuestions()) {
+            question.setQuiz(quiz);
+        }
         quizRepository.save(quiz);
 
         return quizMapper.toQuizDto(quiz);
@@ -103,6 +110,14 @@ public class QuizServiceImpl implements QuizService {
             .findTopByStudentAndQuizOrderByAttemptNumberDesc(student, quiz);
         return quizAttemptMapper.toQuizAttemptDto(attempt);
     }
+
+//    @Override
+//    public void update(int quizId, QuizDto dto) {
+//        Quiz quiz= quizRepository.findById(quizId)
+//            .orElseThrow(()-> new ResourceNotFoundException("quiz not found"));
+//
+//        quiz.setQuestions();
+//    }
 
     private int getNextAttemptNumber(Student student, Quiz quiz) {
         List<QuizAttempt> attempts = quizAttemptRepository.findByStudentAndQuiz(student, quiz);

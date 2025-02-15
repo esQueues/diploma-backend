@@ -15,4 +15,6 @@ public interface CourseService {
     void enrollCourse(int courseId, Authentication authentication);
     List<CourseSummaryDto> getMyCourses(Authentication authentication);
     List<CourseDto> getAllCourses();
+
+    void deleteCourse(int id);
 }

@@ -14,4 +14,5 @@ public class CourseDto {
     private List<ModuleDto> modules;
     private TeacherDto teacher;
     private boolean isEnrolled;
+    private boolean isCreator;
 }
