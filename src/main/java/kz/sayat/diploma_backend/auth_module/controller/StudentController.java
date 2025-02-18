@@ -29,9 +29,9 @@ public class StudentController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<StudentDto> update(Authentication authentication,
+    public ResponseEntity<StudentDto> update(@PathVariable(name = "id") int id,
                                              @RequestBody StudentDto studentDto) {
-        return ResponseEntity.ok(studentService.updateStudent(authentication, studentDto));
+        return ResponseEntity.ok(studentService.updateStudent(id, studentDto));
     }
 
     @DeleteMapping("/{id}")
@@ -42,7 +42,6 @@ public class StudentController {
 
     @GetMapping("/all")
     public ResponseEntity<List<StudentDto>> getAllTeachers() {
-        List<StudentDto> students = studentService.getAllStudents();
-        return ResponseEntity.ok(students);
+        return ResponseEntity.ok(studentService.getAllStudents());
     }
 }

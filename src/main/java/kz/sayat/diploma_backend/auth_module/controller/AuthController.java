@@ -46,7 +46,6 @@ public class AuthController {
         authService.registerTeacher(registerRequest);
     }
 
-
     @GetMapping("/check-session")
     public ResponseEntity<?> checkSession(HttpServletRequest request) {
         return (request.getSession(false) != null)
@@ -57,16 +56,7 @@ public class AuthController {
     @GetMapping("/user")
     public ResponseEntity<Map<String, String>> getUserRole(Authentication authentication) {
         return ResponseEntity.ok(authService.giveRole(authentication));
-//        User user = (User) session.getAttribute("user");
-//        if (user != null) {
-//            Map<String, String> response = new HashMap<>();
-//            response.put("role", user.getRole().toString());
-//            return ResponseEntity.ok(response);
-//        }
-
     }
-
-
 }
 
 

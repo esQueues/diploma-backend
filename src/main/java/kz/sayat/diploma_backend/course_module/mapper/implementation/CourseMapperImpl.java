@@ -46,8 +46,13 @@ public class CourseMapperImpl implements CourseMapper {
         courseDto.setId(course.getId());
         courseDto.setTitle(course.getTitle());
         courseDto.setDescription(course.getDescription());
-        courseDto.setModules(moduleMapper.toModuleDtoList(course.getModules()));
-        courseDto.setTeacher(teacherMapper.toTeacherDtoWithoutCourses(course.getTeacher()));
+        if(course.getModules() != null) {
+            courseDto.setModules(moduleMapper.toModuleDtoList(course.getModules()));
+        }
+        if(course.getTeacher() != null) {
+            courseDto.setTeacher(teacherMapper.toTeacherDtoWithoutCourses(course.getTeacher()));
+        }
+        courseDto.setPublic(course.isPublic());
 
         return courseDto;
     }
@@ -68,6 +73,7 @@ public class CourseMapperImpl implements CourseMapper {
         courseSummaryDto.setId(course.getId());
         courseSummaryDto.setTitle(course.getTitle());
         courseSummaryDto.setTeacher(teacherMapper.toTeacherDtoWithoutCourses(course.getTeacher()));
+        courseSummaryDto.setPublic(course.isPublic());
 
         return courseSummaryDto;
     }

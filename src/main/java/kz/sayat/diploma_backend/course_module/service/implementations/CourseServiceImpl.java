@@ -2,6 +2,8 @@ package kz.sayat.diploma_backend.course_module.service.implementations;
 
 
 import jakarta.transaction.Transactional;
+import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
+import kz.sayat.diploma_backend.auth_module.mapper.StudentMapper;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.models.enums.UserRole;
 import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -37,10 +40,12 @@ public class CourseServiceImpl implements CourseService {
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
+    private final StudentMapper studentMapper;
 
 
     @Override
-    public Course createCourse(CourseDto dto, Authentication authentication) {
+    public CourseDto createCourse(CourseDto dto, Authentication authentication) {
+
         Course course = mapper.toCourse(dto);
 
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
@@ -49,7 +54,7 @@ public class CourseServiceImpl implements CourseService {
             .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
         course.setTeacher(teacher);
 
-        return courseRepository.save(course);
+        return courseMapper.toCourseDto(courseRepository.save(course));
     }
 
 
@@ -82,11 +87,6 @@ public class CourseServiceImpl implements CourseService {
         return courseDto;
     }
 
-
-
-
-
-
     @Override
     public void enrollCourse(int courseId, Authentication authentication) {
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
@@ -107,25 +107,70 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseSummaryDto> getMyCourses(Authentication authentication) {
-        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
-        User user = userDetails.getUser();
-        if (!(user instanceof Student student)) {
-            throw new RuntimeException("User is not a student");
-        }
-        studentRepository.findById(user.getId());
-        return courseMapper.toCourseSummaryDtoList(student.getCourses());
+    public List<CourseSummaryDto> getAllCourses() {
+        List<Course> courses=courseRepository.findAll();
+        return courseMapper.toCourseSummaryDtoList(courses);
     }
 
     @Override
-    public List<CourseDto> getAllCourses() {
-        List<Course> courses=courseRepository.findAll();
-        return courseMapper.toCourseDtoList(courses);
+    public List<CourseSummaryDto> getMyCourses(Authentication authentication) {
+        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        if (!(user instanceof Student student)) {
+            throw new RuntimeException("User is not a student");
+        }
+
+        Student fetchedStudent = studentRepository.findById(user.getId())
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        List<Course> courses = fetchedStudent.getCourses().stream()
+            .filter(Course::isPublic)
+            .collect(Collectors.toList());
+
+        return courseMapper.toCourseSummaryDtoList(courses);
     }
 
     @Override
     public void deleteCourse(int id) {
         courseRepository.deleteById(id);
+    }
+
+    @Override
+    public List<StudentDto> getStudentForCourse(int id) {
+        Course course= courseRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        return studentMapper.toStudentDtoList(course.getStudents());
+    }
+
+    @Override
+    public List<CourseSummaryDto> getCourses(String search) {
+        if (search != null && !search.isEmpty()) {
+            List<Course> courses=courseRepository.findByTitleContainingIgnoreCaseAndIsPublicTrue(search);
+            return courseMapper.toCourseSummaryDtoList(courses);
+        }
+        List<Course> courses=courseRepository.findByIsPublicTrue();
+        return courseMapper.toCourseSummaryDtoList(courses);
+    }
+
+    @Override
+    public void approve(int id) {
+        Course course= courseRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        course.setPublic(true);
+    }
+
+    @Override
+    public List<CourseSummaryDto> getPrivateCourses() {
+        List<Course> courses= courseRepository.findByIsPublicFalse();
+        return courseMapper.toCourseSummaryDtoList(courses);
+    }
+
+    @Override
+    public void disallow(int id) {
+        Course course= courseRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        course.setPublic(false);
     }
 
 }

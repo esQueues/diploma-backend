@@ -4,13 +4,11 @@ import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import kz.sayat.diploma_backend.auth_module.service.implementation.StudentServiceImpl;
+import kz.sayat.diploma_backend.quiz_module.dto.*;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuestionMapper;
 import kz.sayat.diploma_backend.quiz_module.service.QuizService;
 import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.course_module.dto.QuizSummaryDto;
-import kz.sayat.diploma_backend.quiz_module.dto.QuizAttemptDto;
-import kz.sayat.diploma_backend.quiz_module.dto.QuizDto;
-import kz.sayat.diploma_backend.quiz_module.dto.StudentAnswerDto;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuizAttemptMapper;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuizMapper;
 import kz.sayat.diploma_backend.course_module.models.Module;
@@ -23,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,15 +40,12 @@ public class QuizServiceImpl implements QuizService {
     private final StudentService studentService;
     private final QuizMapper quizMapper;
 
-
-
+    @Override
     public QuizDto createQuiz(QuizDto dto, int moduleId) {
 
         Module module = moduleRepository.findById(moduleId).
             orElseThrow(() -> new ResourceNotFoundException("module not found"));
         Quiz quiz = quizMapper.toQuiz(dto, module);
-
-//        List<Question> questions = questionMapper.toQuestionList(dto.getQuestions(), quiz);
 
         for (Question question : quiz.getQuestions()) {
             question.setQuiz(quiz);
@@ -59,6 +55,7 @@ public class QuizServiceImpl implements QuizService {
         return quizMapper.toQuizDto(quiz);
     }
 
+    @Override
     public QuizDto findQuiz(int quizId) {
         Quiz quiz = quizRepository.findById(quizId).
             orElseThrow(() -> new ResourceNotFoundException("quiz not found"));
@@ -71,6 +68,7 @@ public class QuizServiceImpl implements QuizService {
         return quizMapper.toQuizSummaryDtoList(quizzes);
     }
 
+    @Override
     public QuizAttemptDto assignGrade(List<StudentAnswerDto> studentAnswers, Authentication authentication, int quizId) {
         Student student= studentService.getStudentFromUser(authentication);
 
@@ -95,6 +93,7 @@ public class QuizServiceImpl implements QuizService {
         return quizAttemptMapper.toQuizAttemptDto(quizAttempt);
     }
 
+    @Override
     public void delete(int quizId) {
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new ResourceNotFoundException("quiz not found"));
@@ -111,13 +110,46 @@ public class QuizServiceImpl implements QuizService {
         return quizAttemptMapper.toQuizAttemptDto(attempt);
     }
 
-//    @Override
-//    public void update(int quizId, QuizDto dto) {
-//        Quiz quiz= quizRepository.findById(quizId)
-//            .orElseThrow(()-> new ResourceNotFoundException("quiz not found"));
-//
-//        quiz.setQuestions();
-//    }
+    @Override
+    public void update(int quizId, QuizDto dto) {
+        Quiz quiz = quizRepository.findById(quizId)
+            .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+
+        quiz.setTitle(dto.getTitle());
+
+        // Map existing questions by ID for efficient lookup
+        Map<Integer, Question> existingQuestions = quiz.getQuestions().stream()
+            .collect(Collectors.toMap(Question::getId, q -> q));
+
+        for (QuestionDto qDto : dto.getQuestions()) {
+            Question question = existingQuestions.getOrDefault(qDto.getId(), new Question());
+            question.setQuestionText(qDto.getQuestionText());
+            question.setQuiz(quiz);
+
+            // ⚠️ Instead of replacing, update existing answers
+            Map<Integer, Answer> existingAnswers = question.getAnswers().stream()
+                .collect(Collectors.toMap(Answer::getId, a -> a));
+
+            // Create a list to hold updated answers
+            List<Answer> answersToKeep = new ArrayList<>();
+
+            for (AnswerDto aDto : qDto.getAnswers()) {
+                Answer answer = existingAnswers.getOrDefault(aDto.getId(), new Answer());
+                answer.setAnswerText(aDto.getAnswerText());
+                answer.setCorrect(aDto.isCorrect());
+                answer.setQuestion(question);
+                answersToKeep.add(answer);
+            }
+
+            // ⚠️ Instead of `setAnswers()`, modify the list directly
+            question.getAnswers().clear();
+            question.getAnswers().addAll(answersToKeep);
+        }
+
+        quizRepository.save(quiz);
+    }
+
+
 
     private int getNextAttemptNumber(Student student, Quiz quiz) {
         List<QuizAttempt> attempts = quizAttemptRepository.findByStudentAndQuiz(student, quiz);

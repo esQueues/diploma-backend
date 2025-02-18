@@ -9,4 +9,5 @@ public class CourseSummaryDto {
     private int id;
     private String title;
     private TeacherDto teacher;
+    private boolean isPublic;
 }

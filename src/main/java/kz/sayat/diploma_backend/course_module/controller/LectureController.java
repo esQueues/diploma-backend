@@ -17,10 +17,7 @@ public class LectureController {
 
     @PostMapping("/{moduleId}/lectures")
     public ResponseEntity<LectureDto> createLecture(@RequestBody LectureDto dto, @PathVariable int moduleId) {
-        dto.setModuleId(moduleId);
-//        Lecture createdLecture = lectureService.createLecture(dto);
-//        dto.setId(createdLecture.getId());
-        return new ResponseEntity<>(lectureService.createLecture(dto), HttpStatus.CREATED);
+        return new ResponseEntity<>(lectureService.createLecture(dto, moduleId), HttpStatus.CREATED);
     }
 
     @GetMapping("/lectures/{id}")

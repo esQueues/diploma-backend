@@ -45,8 +45,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentDto updateStudent(Authentication authentication, StudentDto studentDto) {
-        Student student = getStudentFromUser(authentication);
+    public StudentDto updateStudent(int id, StudentDto studentDto) {
+//        Student student = getStudentFromUser(authentication);
+        Student student=studentRepository.findById(id).orElseThrow(() ->
+            new RuntimeException("Student not found"));
         student.setEmail(studentDto.getEmail());
         student.setBirthDate(studentDto.getBirthday());
         student.setGradeLevel(studentDto.getGradeLevel());

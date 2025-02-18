@@ -15,4 +15,5 @@ public class CourseDto {
     private TeacherDto teacher;
     private boolean isEnrolled;
     private boolean isCreator;
+    private boolean isPublic;
 }

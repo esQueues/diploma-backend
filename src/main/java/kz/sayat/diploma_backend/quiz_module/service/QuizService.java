@@ -12,14 +12,18 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 public interface QuizService {
+
     QuizDto createQuiz(QuizDto dto, int moduleId);
+
     QuizDto findQuiz(int quizId);
+
     List<QuizSummaryDto> findAllQuizByModuleId(int moduleId);
+
     QuizAttemptDto assignGrade(List<StudentAnswerDto> studentAnswers, Authentication authentication, int quizId);
+
     void delete(int quizId);
 
     QuizAttemptDto getAttempt(int quizId, Authentication authentication);
 
-
-//    void update(int quizId, QuizDto dto);
+    void update(int quizId, QuizDto dto);
 }

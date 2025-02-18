@@ -26,8 +26,8 @@ public class LectureServiceImpl implements LectureService {
 
 
     @Override
-    public LectureDto createLecture(LectureDto dto) {
-        Module module = moduleRepository.findById(dto.getModuleId()).
+    public LectureDto createLecture(LectureDto dto, int moduleId) {
+        Module module = moduleRepository.findById(moduleId).
             orElseThrow(NoSuchElementException::new);
         Lecture lecture = mapper.toLecture(dto);
         lecture.setModule(module);

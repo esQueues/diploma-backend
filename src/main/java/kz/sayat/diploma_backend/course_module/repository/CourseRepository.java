@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Integer> {
+    List<Course> findByTitleContainingIgnoreCaseAndIsPublicTrue(String name);
+    List<Course> findByIsPublicTrue();
+    List<Course> findByIsPublicFalse();
 
 }

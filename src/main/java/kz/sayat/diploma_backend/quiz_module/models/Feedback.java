@@ -3,6 +3,8 @@ package kz.sayat.diploma_backend.quiz_module.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "feedbacks")
 @Data
@@ -22,6 +24,9 @@ public class Feedback {
     @ManyToOne
     @JoinColumn(name = "attempt_id", nullable = false)
     private QuizAttempt quizAttempt;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     public Feedback(String promptText, String feedbackText, QuizAttempt attempt) {
         this.promptText = promptText;

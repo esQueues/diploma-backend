@@ -35,4 +35,7 @@ public class Course {
     @ManyToMany(mappedBy = "courses", fetch = FetchType.EAGER)
     private List<Student> students;
 
+    @Column(name = "is_public")
+    private boolean isPublic;
+
 }

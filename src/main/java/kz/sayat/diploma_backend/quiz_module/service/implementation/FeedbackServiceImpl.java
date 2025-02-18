@@ -3,6 +3,8 @@ package kz.sayat.diploma_backend.quiz_module.service.implementation;
 import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
+import kz.sayat.diploma_backend.quiz_module.dto.FeedbackDto;
+import kz.sayat.diploma_backend.quiz_module.repository.AttemptAnswerRepository;
 import kz.sayat.diploma_backend.quiz_module.service.FeedbackService;
 import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.quiz_module.dto.GeminiRequest;
@@ -17,7 +19,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -61,6 +65,41 @@ public class FeedbackServiceImpl implements FeedbackService {
             .orElseThrow(() -> new ResourceNotFoundException("Feedback not found for this attempt"));
 
         return feedback.getFeedbackText();
+    }
+
+    @Override
+    public List<FeedbackDto> getAllFeedback() {
+        List<Feedback> feedbacks = feedbackRepository.findAll();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return feedbacks.stream()
+            .map(feedback -> {
+                // Extract data from the associated QuizAttempt
+                String studentFirstname = feedback.getQuizAttempt().getStudent().getFirstname();
+                String studentLastname = feedback.getQuizAttempt().getStudent().getLastname();
+                String courseTitle = feedback.getQuizAttempt().getQuiz().getModule().getCourse().getTitle();
+                String quizTitle = feedback.getQuizAttempt().getQuiz().getTitle();
+                String attemptTime = feedback.getCreatedAt().format(formatter);
+
+
+
+                return new FeedbackDto(
+                    feedback.getId(),
+                    feedback.getFeedbackText(),
+                    studentFirstname,
+                    studentLastname,
+                    courseTitle,
+                    quizTitle,
+                    attemptTime
+                );
+            })
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteFeedback(int id) {
+        feedbackRepository.deleteById(id);
     }
 
     private String buildPrompt(QuizAttempt quizAttempt) {

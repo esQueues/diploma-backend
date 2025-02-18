@@ -25,15 +25,13 @@ public class TeacherController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TeacherDto> getTeacherById(@PathVariable int id) {
-        TeacherDto teacherDto = teacherService.getTeacherById(id);
-        return ResponseEntity.ok(teacherDto);
+        return ResponseEntity.ok(teacherService.getTeacherById(id));
     }
 
 
     @PutMapping("/{id}")
     public ResponseEntity<TeacherDto> updateTeacher(Authentication authentication, @RequestBody TeacherDto teacherDto) {
-        TeacherDto updatedTeacher = teacherService.updateTeacher(authentication, teacherDto);
-        return ResponseEntity.ok(updatedTeacher);
+        return ResponseEntity.ok(teacherService.updateTeacher(authentication, teacherDto));
     }
 
     @DeleteMapping("/{id}")
@@ -44,8 +42,7 @@ public class TeacherController {
 
     @GetMapping
     public ResponseEntity<List<TeacherDto>> getAllTeachers() {
-        List<TeacherDto> teachers = teacherService.getAllTeachers();
-        return ResponseEntity.ok(teachers);
+        return ResponseEntity.ok(teacherService.getAllTeachers());
     }
 
     @GetMapping("/courses")

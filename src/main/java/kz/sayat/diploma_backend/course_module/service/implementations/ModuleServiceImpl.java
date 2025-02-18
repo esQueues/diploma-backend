@@ -33,14 +33,16 @@ public class ModuleServiceImpl implements ModuleService {
     private final LectureServiceImpl lectureService;
     private final LectureRepository lectureRepository;
     private final QuizRepository quizRepository;
+    private final ModuleMapper moduleMapper;
 
     @Override
-    public Module createModule(ModuleDto dto) {
-        Course course = courseRepository.findById(dto.getCourseId())
+    public ModuleDto createModule(ModuleDto dto, int courseId) {
+        Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new NoSuchElementException("Course with ID " + dto.getCourseId() + " not found"));
         Module module = mapper.toModule(dto);
         module.setCourse(course);
-        return moduleRepository.save(module);
+
+        return moduleMapper.toModuleDto(moduleRepository.save(module));
     }
 
     @Override

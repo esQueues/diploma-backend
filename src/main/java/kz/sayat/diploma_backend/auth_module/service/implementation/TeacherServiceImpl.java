@@ -89,6 +89,8 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public List<CourseSummaryDto> getCreatedCourses(Authentication authentication) {
         Teacher teacher=getTeacherFromUser(authentication);
+        teacher = teacherRepository.findById(teacher.getId()).orElseThrow(() ->
+            new ResourceNotFoundException("Teacher not found"));
         List<Course> createdCourses= teacher.getCreatedCourses();
         return courseMapper.toCourseSummaryDtoList(createdCourses);
     }

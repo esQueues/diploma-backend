@@ -1,5 +1,6 @@
 package kz.sayat.diploma_backend.course_module.controller;
 
+import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
 import kz.sayat.diploma_backend.course_module.dto.CourseDto;
 import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
 import kz.sayat.diploma_backend.course_module.models.Course;
@@ -23,20 +24,13 @@ public class CourseController {
 
     @PostMapping()
     public ResponseEntity<CourseDto> courseCreation(@RequestBody CourseDto dto, Authentication authentication) {
-        Course createdCourse= courseService.createCourse(dto, authentication);
-        dto.setId(createdCourse.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(courseService.createCourse(dto, authentication));
     }
 
-    @GetMapping
-    public ResponseEntity<List<CourseDto>> getAllCourses() {
-        return ResponseEntity.ok().body(courseService.getAllCourses());
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseDto> getCourseById(@PathVariable int id,  Authentication auth) {
-        CourseDto courseDto = courseService.findCourseById(id, auth);
-        return ResponseEntity.ok(courseDto);
+        return ResponseEntity.ok(courseService.findCourseById(id, auth));
     }
 
 
@@ -58,5 +52,28 @@ public class CourseController {
     }
 
 
+    @GetMapping("/{id}/students")
+    public ResponseEntity<List<StudentDto>> enrolledStudents(@PathVariable(name = "id") int id) {
+        return ResponseEntity.ok(courseService.getStudentForCourse(id));
+    }
 
+    @GetMapping("/get")
+    public ResponseEntity<List<CourseSummaryDto>> searchCourses(@RequestParam(name = "query") String search) {
+        return ResponseEntity.ok(courseService.getCourses(search));
+    }
+
+    @PatchMapping ("/{id}/approve")
+    public void approveCourse(@PathVariable(name = "id") int id) {
+        courseService.approve(id);
+    }
+
+    @PatchMapping("/{id}/disallow")
+    public void disallowCourse(@PathVariable(name = "id") int id) {
+        courseService.disallow(id);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<CourseSummaryDto>> getAllCourses() {
+        return ResponseEntity.ok(courseService.getAllCourses());
+    }
 }

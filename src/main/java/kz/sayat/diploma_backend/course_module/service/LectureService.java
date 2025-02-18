@@ -6,7 +6,7 @@ import kz.sayat.diploma_backend.course_module.models.Lecture;
 import java.util.List;
 
 public interface LectureService {
-    LectureDto createLecture(LectureDto dto);
+    LectureDto createLecture(LectureDto dto, int moduleId);
     LectureDto findLectureById(int id);
     List<LectureDto> findAllLecturesByModuleId(int moduleId);
 

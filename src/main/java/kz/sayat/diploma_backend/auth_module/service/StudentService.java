@@ -10,7 +10,7 @@ public interface StudentService {
     void save(Student student);
     StudentDto getProfile(Authentication authentication);
     StudentDto getById(int id);
-    StudentDto updateStudent(Authentication authentication, StudentDto studentDto);
+    StudentDto updateStudent(int id, StudentDto studentDto);
     void deleteStudent(int id);
     List<StudentDto> getAllStudents();
     Student getStudentFromUser(Authentication authentication);

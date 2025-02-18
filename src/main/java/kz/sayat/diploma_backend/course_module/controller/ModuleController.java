@@ -23,10 +23,7 @@ public class ModuleController {
     @PostMapping("/{courseId}/modules")
     public ResponseEntity<ModuleDto> createModule(@RequestBody ModuleDto dto,
                                   @PathVariable(name = "courseId")int courseId) {
-        dto.setCourseId(courseId);
-        Module savedModule = moduleService.createModule(dto);
-        dto.setId(savedModule.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(moduleService.createModule(dto, courseId));
     }
 
     @GetMapping("/modules/{moduleId}")
@@ -36,8 +33,7 @@ public class ModuleController {
 
     @GetMapping("/modules/{moduleId}/lectures")
     public ResponseEntity<List<LectureDto>> getAllLectures(@PathVariable("moduleId") int moduleId) {
-        List<LectureDto> lecturesDto = lectureService.findAllLecturesByModuleId(moduleId);
-        return ResponseEntity.ok().body(lecturesDto);
+        return ResponseEntity.ok().body(lectureService.findAllLecturesByModuleId(moduleId));
     }
 
     @PutMapping("/modules/{moduleId}")

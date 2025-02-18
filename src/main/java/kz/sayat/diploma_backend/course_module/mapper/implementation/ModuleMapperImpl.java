@@ -41,8 +41,12 @@ public class ModuleMapperImpl implements ModuleMapper {
         dto.setId(module.getId());
         dto.setTitle(module.getTitle());
         dto.setCourseId(module.getCourse().getId());
-        dto.setQuizzes(quizMapper.toQuizSummaryDtoList(module.getQuizzes()));
-        dto.setLectures(lectureMapper.toLectureDtoList(module.getLectures()));
+        if(module.getQuizzes()!=null){
+            dto.setQuizzes(quizMapper.toQuizSummaryDtoList(module.getQuizzes()));
+        }
+        if(module.getLectures()!=null){
+            dto.setLectures(lectureMapper.toLectureDtoList(module.getLectures()));
+        }
         return dto;
     }
 
