@@ -2,13 +2,10 @@ package kz.sayat.diploma_backend.auth_module.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import kz.sayat.diploma_backend.auth_module.dto.LoginRequest;
-import kz.sayat.diploma_backend.auth_module.dto.RegisterRequest;
+import kz.sayat.diploma_backend.auth_module.security.dto.LoginRequest;
+import kz.sayat.diploma_backend.auth_module.security.dto.RegisterRequest;
 import kz.sayat.diploma_backend.auth_module.dto.UserDto;
-import kz.sayat.diploma_backend.auth_module.models.User;
-import kz.sayat.diploma_backend.auth_module.models.enums.UserRole;
 import kz.sayat.diploma_backend.auth_module.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController

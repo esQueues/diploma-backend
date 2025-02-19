@@ -76,4 +76,9 @@ public class CourseController {
     public ResponseEntity<List<CourseSummaryDto>> getAllCourses() {
         return ResponseEntity.ok(courseService.getAllCourses());
     }
+
+    @PutMapping("/{id}")
+    public void editCourse(@PathVariable(name = "id") int id, @RequestBody CourseDto dto) {
+        courseService.editCourse(dto, id);
+    }
 }

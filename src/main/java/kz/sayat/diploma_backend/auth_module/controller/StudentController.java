@@ -1,5 +1,7 @@
 package kz.sayat.diploma_backend.auth_module.controller;
 
+import jakarta.validation.Valid;
+import kz.sayat.diploma_backend.auth_module.dto.PasswordDto;
 import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +30,10 @@ public class StudentController {
     }
 
 
-    @PutMapping("/{id}")
-    public ResponseEntity<StudentDto> update(@PathVariable(name = "id") int id,
-                                             @RequestBody StudentDto studentDto) {
-        return ResponseEntity.ok(studentService.updateStudent(id, studentDto));
+    @PutMapping("/profile/update")
+    public ResponseEntity<StudentDto> update(@Valid @RequestBody StudentDto studentDto,
+                                             Authentication authentication) {
+        return ResponseEntity.ok(studentService.updateStudent(authentication, studentDto));
     }
 
     @DeleteMapping("/{id}")
@@ -40,8 +42,16 @@ public class StudentController {
         studentService.deleteStudent(id);
     }
 
+
     @GetMapping("/all")
     public ResponseEntity<List<StudentDto>> getAllTeachers() {
         return ResponseEntity.ok(studentService.getAllStudents());
+    }
+
+    @PutMapping("/profile/change-password")
+    @ResponseStatus(HttpStatus.OK)
+    public void changePassword(@RequestBody PasswordDto changePasswordDto,
+                               Authentication authentication) {
+        studentService.changePassword(authentication, changePasswordDto);
     }
 }

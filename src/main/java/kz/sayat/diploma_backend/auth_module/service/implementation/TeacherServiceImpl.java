@@ -1,6 +1,7 @@
 package kz.sayat.diploma_backend.auth_module.service.implementation;
 
 import jakarta.transaction.Transactional;
+import kz.sayat.diploma_backend.auth_module.dto.PasswordDto;
 import kz.sayat.diploma_backend.auth_module.dto.TeacherDto;
 import kz.sayat.diploma_backend.auth_module.service.TeacherService;
 import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
@@ -41,15 +42,14 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    public TeacherDto updateTeacher(Authentication authentication, TeacherDto teacherDto) {
+    public void updateTeacher(Authentication authentication, TeacherDto teacherDto) {
         Teacher teacher = getTeacherFromUser(authentication);
-        teacher.setBio(teacherDto.getBio());
-        teacher.setEmail(teacherDto.getEmail());
+
         teacher.setFirstname(teacherDto.getFirstname());
         teacher.setLastname(teacherDto.getLastname());
+        teacher.setBio(teacherDto.getBio());
         Teacher savedTeacher = teacherRepository.save(teacher);
 
-        return teacherMapper.toTeacherDto(savedTeacher);
     }
 
     @Override
@@ -93,5 +93,15 @@ public class TeacherServiceImpl implements TeacherService {
             new ResourceNotFoundException("Teacher not found"));
         List<Course> createdCourses= teacher.getCreatedCourses();
         return courseMapper.toCourseSummaryDtoList(createdCourses);
+    }
+
+    @Override
+    public void changePassword(Authentication authentication, PasswordDto changePasswordDto) {
+        Teacher teacher = getTeacherFromUser(authentication);
+        if(!encoder.matches(changePasswordDto.getOldPassword(), teacher.getPassword())){
+            throw new ResourceNotFoundException("Password does not match");
+        }
+        teacher.setPassword(encoder.encode(changePasswordDto.getNewPassword()));
+        teacherRepository.save(teacher);
     }
 }

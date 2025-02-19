@@ -1,4 +1,4 @@
-package kz.sayat.diploma_backend.auth_module.dto;
+package kz.sayat.diploma_backend.auth_module.security.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

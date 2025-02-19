@@ -32,4 +32,6 @@ public interface CourseService {
     List<CourseSummaryDto> getPrivateCourses();
 
     void disallow(int id);
+
+    void editCourse(CourseDto dto, int id);
 }

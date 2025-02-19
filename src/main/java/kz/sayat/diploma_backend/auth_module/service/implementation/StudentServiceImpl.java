@@ -1,6 +1,7 @@
 package kz.sayat.diploma_backend.auth_module.service.implementation;
 
 import jakarta.transaction.Transactional;
+import kz.sayat.diploma_backend.auth_module.dto.PasswordDto;
 import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import kz.sayat.diploma_backend.util.exceptions.UnauthorizedException;
@@ -45,11 +46,9 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentDto updateStudent(int id, StudentDto studentDto) {
-//        Student student = getStudentFromUser(authentication);
-        Student student=studentRepository.findById(id).orElseThrow(() ->
-            new RuntimeException("Student not found"));
-        student.setEmail(studentDto.getEmail());
+    public StudentDto updateStudent(Authentication authentication, StudentDto studentDto) {
+        Student student = getStudentFromUser(authentication);
+
         student.setBirthDate(studentDto.getBirthday());
         student.setGradeLevel(studentDto.getGradeLevel());
         student.setFirstname(studentDto.getFirstname());
@@ -86,5 +85,15 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("User is not a student");
         }
         return student;
+    }
+
+    @Override
+    public void changePassword(Authentication authentication, PasswordDto changePasswordDto) {
+        Student student= getStudentFromUser(authentication);
+        if (!encoder.matches(changePasswordDto.getOldPassword(), student.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect.");
+        }
+        student.setPassword(encoder.encode(changePasswordDto.getNewPassword()));
+        studentRepository.save(student);
     }
 }

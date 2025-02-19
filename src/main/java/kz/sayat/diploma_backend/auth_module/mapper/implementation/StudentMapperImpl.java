@@ -1,6 +1,6 @@
 package kz.sayat.diploma_backend.auth_module.mapper.implementation;
 
-import kz.sayat.diploma_backend.auth_module.dto.RegisterRequest;
+import kz.sayat.diploma_backend.auth_module.security.dto.RegisterRequest;
 import kz.sayat.diploma_backend.auth_module.dto.StudentDto;
 import kz.sayat.diploma_backend.auth_module.mapper.StudentMapper;
 import kz.sayat.diploma_backend.auth_module.models.Student;

@@ -173,4 +173,12 @@ public class CourseServiceImpl implements CourseService {
         course.setPublic(false);
     }
 
+    @Override
+    public void editCourse(CourseDto dto, int id) {
+        Course course= courseRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        course.setTitle(dto.getTitle());
+        course.setDescription(dto.getDescription());
+    }
+
 }
