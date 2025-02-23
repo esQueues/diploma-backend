@@ -75,7 +75,6 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         return feedbacks.stream()
             .map(feedback -> {
-                // Extract data from the associated QuizAttempt
                 String studentFirstname = feedback.getQuizAttempt().getStudent().getFirstname();
                 String studentLastname = feedback.getQuizAttempt().getStudent().getLastname();
                 String courseTitle = feedback.getQuizAttempt().getQuiz().getModule().getCourse().getTitle();
