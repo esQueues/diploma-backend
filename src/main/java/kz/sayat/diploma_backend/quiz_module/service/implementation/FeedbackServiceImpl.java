@@ -122,7 +122,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .orElse("Дұрыс жауап табылмады");
 
             prompt.append("- Сұрақ: ").append(question.getQuestionText()).append("\n");
-            prompt.append("  Сіздің жауабыңыз: ").append(attemptAnswer.getAnswer().getAnswerText()).append("\n");
+            prompt.append("  Студенттің жауабы: ").append(attemptAnswer.getAnswer().getAnswerText()).append("\n");
             prompt.append("  Дұрыс жауап: ").append(correctAnswerText).append("\n");
             prompt.append("  Нәтиже: ").append(attemptAnswer.isCorrect() ? "✅ Дұрыс" : "❌ Қате").append("\n\n");
 
