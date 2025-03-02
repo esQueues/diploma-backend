@@ -11,6 +11,7 @@ public class ModuleDto {
     private String title;
 
     private int courseId;
+    private double progress;
     private List<QuizSummaryDto> quizzes;
     private List<LectureDto> lectures;
 }

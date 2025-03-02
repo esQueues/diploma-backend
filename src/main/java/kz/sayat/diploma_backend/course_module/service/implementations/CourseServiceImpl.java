@@ -10,7 +10,13 @@ import kz.sayat.diploma_backend.auth_module.repository.StudentRepository;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import kz.sayat.diploma_backend.auth_module.service.TeacherService;
 import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
+import kz.sayat.diploma_backend.course_module.dto.ModuleDto;
+import kz.sayat.diploma_backend.course_module.repository.ModuleRepository;
 import kz.sayat.diploma_backend.course_module.service.CourseService;
+import kz.sayat.diploma_backend.quiz_module.models.Quiz;
+import kz.sayat.diploma_backend.quiz_module.models.QuizAttempt;
+import kz.sayat.diploma_backend.quiz_module.repository.QuizAttemptRepository;
+import kz.sayat.diploma_backend.quiz_module.repository.QuizRepository;
 import kz.sayat.diploma_backend.util.exceptions.ResourceNotFoundException;
 import kz.sayat.diploma_backend.course_module.dto.CourseDto;
 import kz.sayat.diploma_backend.course_module.models.Course;
@@ -23,7 +29,7 @@ import kz.sayat.diploma_backend.auth_module.security.MyUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
+import kz.sayat.diploma_backend.course_module.models.Module;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,7 +47,10 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
     private final StudentMapper studentMapper;
+    private final ModuleRepository moduleRepository;
 
+    private final QuizRepository quizRepository;
+    private final QuizAttemptRepository attemptRepository;
 
     @Override
     public CourseDto createCourse(CourseDto dto, Authentication authentication) {
@@ -63,6 +72,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
+        final Student authenticatedStudent; // Добавляем final
         boolean isEnrolled = false;
         boolean isTeacher = false;
 
@@ -71,21 +81,37 @@ public class CourseServiceImpl implements CourseService {
             UserRole role = userDetails.getUser().getRole();
 
             if (role == UserRole.STUDENT) {
-                Student authenticatedStudent = studentService.getStudentFromUser(auth);
+                authenticatedStudent = studentService.getStudentFromUser(auth);
                 isEnrolled = course.getStudents().stream()
                     .anyMatch(student -> student.getId() == authenticatedStudent.getId());
             } else if (role == UserRole.TEACHER) {
                 Teacher authenticatedTeacher = teacherService.getTeacherFromUser(auth);
                 isTeacher = (course.getTeacher().getId() == authenticatedTeacher.getId());
+                authenticatedStudent = null; // Чтобы не было ошибки инициализации
+            } else {
+                authenticatedStudent = null;
             }
+        } else {
+            authenticatedStudent = null;
         }
 
         CourseDto courseDto = mapper.toCourseDto(course);
         courseDto.setEnrolled(isEnrolled);
         courseDto.setCreator(isTeacher);
 
+        if (authenticatedStudent != null) {
+            for (ModuleDto moduleDto : courseDto.getModules()) {
+                double progress = calculateModuleProgress(authenticatedStudent.getId(), moduleDto.getId());
+                moduleDto.setProgress(progress);
+            }
+        } else {
+            courseDto.getModules().forEach(module -> module.setProgress(0));
+        }
+
         return courseDto;
     }
+
+
 
     @Override
     public void enrollCourse(int courseId, Authentication authentication) {
@@ -126,10 +152,59 @@ public class CourseServiceImpl implements CourseService {
 
         List<Course> courses = fetchedStudent.getCourses().stream()
             .filter(Course::isPublic)
-            .collect(Collectors.toList());
+            .toList();
 
-        return courseMapper.toCourseSummaryDtoList(courses);
+        return courses.stream()
+            .map(course -> {
+                CourseSummaryDto dto = courseMapper.toCourseSummaryDto(course);
+                double progress = calculateCourseProgress(fetchedStudent.getId(), course.getId());
+                dto.setProgress(progress);
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
+
+    public double calculateCourseProgress(int studentId, int courseId) {
+        // Получаем все модули курса
+        List<Module> modules = moduleRepository.findByCourseId(courseId);
+
+        double totalProgress = 0;
+        int totalModules = modules.size();
+
+        for (Module module : modules) {
+            totalProgress += calculateModuleProgress(studentId, module.getId());
+        }
+
+        return totalModules == 0 ? 0 : totalProgress / totalModules;
+    }
+
+    public double calculateModuleProgress(int studentId, int moduleId) {
+        int totalQuizzes = quizRepository.countByModuleId(moduleId);
+
+        if (totalQuizzes == 0) {
+            return 100.0;
+        }
+
+        List<Quiz> quizzes = quizRepository.findQuizzesByModule_Id(moduleId);
+
+        double totalScore = 0;
+
+        Student student = studentRepository.findById(studentId)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        for (Quiz quiz : quizzes) {
+            QuizAttempt lastAttempt = attemptRepository.findTopByStudentAndQuizOrderByAttemptNumberDesc(student, quiz);
+
+            if (lastAttempt != null && lastAttempt.isPassed()) {
+                totalScore += lastAttempt.getScore();
+            }
+        }
+
+        return totalScore / totalQuizzes;
+    }
+
+
+
 
     @Override
     public void deleteCourse(int id) {

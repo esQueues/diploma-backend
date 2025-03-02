@@ -17,7 +17,8 @@ public class QuizAttemptMapperImpl implements QuizAttemptMapper {
             quizAttempt.getStudent().getId(),
             quizAttempt.getQuiz().getId(),
             quizAttempt.getAttemptNumber(),
-            quizAttempt.getScore()
+            quizAttempt.getScore(),
+            quizAttempt.isPassed()
         );
     }
 }

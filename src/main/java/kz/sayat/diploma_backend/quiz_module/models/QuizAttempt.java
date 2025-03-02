@@ -36,4 +36,6 @@ public class QuizAttempt {
     @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Feedback> feedbackList;
 
+    private boolean passed;
+
 }

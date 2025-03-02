@@ -3,7 +3,7 @@ package kz.sayat.diploma_backend.quiz_module.service.implementation;
 import jakarta.transaction.Transactional;
 import kz.sayat.diploma_backend.auth_module.models.Student;
 import kz.sayat.diploma_backend.auth_module.service.StudentService;
-import kz.sayat.diploma_backend.auth_module.service.implementation.StudentServiceImpl;
+import kz.sayat.diploma_backend.course_module.models.Course;
 import kz.sayat.diploma_backend.quiz_module.dto.*;
 import kz.sayat.diploma_backend.quiz_module.mapper.QuestionMapper;
 import kz.sayat.diploma_backend.quiz_module.service.QuizService;
@@ -39,6 +39,8 @@ public class QuizServiceImpl implements QuizService {
     private final QuestionMapper questionMapper;
     private final StudentService studentService;
     private final QuizMapper quizMapper;
+
+
 
     @Override
     public QuizDto createQuiz(QuizDto dto, int moduleId) {
@@ -82,7 +84,12 @@ public class QuizServiceImpl implements QuizService {
 
         List<QuizAttemptAnswer> attemptAnswers = mapStudentAnswersToAttempt(studentAnswers, quiz);
 
-        quizAttempt.setScore(calculateScore(attemptAnswers, quiz));
+        double score = calculateScore(attemptAnswers, quiz);
+        quizAttempt.setScore(score);
+
+        boolean passed = score >= quiz.getPassingScore();
+        quizAttempt.setPassed(passed);
+
         quizAttemptRepository.save(quizAttempt);
 
         for (QuizAttemptAnswer attemptAnswer : attemptAnswers) {
@@ -148,6 +155,9 @@ public class QuizServiceImpl implements QuizService {
 
         quizRepository.save(quiz);
     }
+
+
+
 
 
 

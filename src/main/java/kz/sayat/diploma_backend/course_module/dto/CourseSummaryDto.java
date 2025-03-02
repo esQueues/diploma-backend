@@ -10,4 +10,5 @@ public class CourseSummaryDto {
     private String title;
     private TeacherDto teacher;
     private boolean isPublic;
+    private double progress;
 }

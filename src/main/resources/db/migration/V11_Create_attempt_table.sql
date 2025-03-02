@@ -4,5 +4,6 @@ CREATE TABLE attempts(
     quiz_id INT REFERENCES quizzes(id) ON DELETE CASCADE ,
     attempt_number INT,
     score DECIMAL(5,2),
-    submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    passed boolean DEFAULT FALSE
 )

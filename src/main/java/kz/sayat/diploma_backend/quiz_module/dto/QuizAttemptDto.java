@@ -11,4 +11,5 @@ public class QuizAttemptDto {
     private int quizId;
     private int attemptNumber;
     private double score;
+    private boolean passed;
 }
