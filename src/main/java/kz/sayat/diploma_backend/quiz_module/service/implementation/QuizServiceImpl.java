@@ -124,7 +124,6 @@ public class QuizServiceImpl implements QuizService {
 
         quiz.setTitle(dto.getTitle());
 
-        // Map existing questions by ID for efficient lookup
         Map<Integer, Question> existingQuestions = quiz.getQuestions().stream()
             .collect(Collectors.toMap(Question::getId, q -> q));
 

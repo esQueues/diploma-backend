@@ -11,6 +11,9 @@ import kz.sayat.diploma_backend.auth_module.service.StudentService;
 import kz.sayat.diploma_backend.auth_module.service.TeacherService;
 import kz.sayat.diploma_backend.course_module.dto.CourseSummaryDto;
 import kz.sayat.diploma_backend.course_module.dto.ModuleDto;
+import kz.sayat.diploma_backend.course_module.models.Enrollment;
+import kz.sayat.diploma_backend.course_module.models.EnrollmentId;
+import kz.sayat.diploma_backend.course_module.repository.EnrollmentRepository;
 import kz.sayat.diploma_backend.course_module.repository.ModuleRepository;
 import kz.sayat.diploma_backend.course_module.service.CourseService;
 import kz.sayat.diploma_backend.quiz_module.models.Quiz;
@@ -48,7 +51,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseMapper courseMapper;
     private final StudentMapper studentMapper;
     private final ModuleRepository moduleRepository;
-
+    private final EnrollmentRepository enrollmentRepository;
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository attemptRepository;
 
@@ -72,36 +75,31 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        final Student authenticatedStudent; // Добавляем final
         boolean isEnrolled = false;
         boolean isTeacher = false;
+        Integer authenticatedStudentId = null;
 
         if (auth != null && auth.isAuthenticated()) {
             MyUserDetails userDetails = (MyUserDetails) auth.getPrincipal();
             UserRole role = userDetails.getUser().getRole();
 
             if (role == UserRole.STUDENT) {
-                authenticatedStudent = studentService.getStudentFromUser(auth);
-                isEnrolled = course.getStudents().stream()
-                    .anyMatch(student -> student.getId() == authenticatedStudent.getId());
+                Student authenticatedStudent = studentService.getStudentFromUser(auth);
+                authenticatedStudentId = authenticatedStudent.getId();
+                isEnrolled = enrollmentRepository.existsByStudentAndCourse(authenticatedStudent, course);
             } else if (role == UserRole.TEACHER) {
                 Teacher authenticatedTeacher = teacherService.getTeacherFromUser(auth);
-                isTeacher = (course.getTeacher().getId() == authenticatedTeacher.getId());
-                authenticatedStudent = null; // Чтобы не было ошибки инициализации
-            } else {
-                authenticatedStudent = null;
+                isTeacher = course.getTeacher().getId() == authenticatedTeacher.getId();
             }
-        } else {
-            authenticatedStudent = null;
         }
 
         CourseDto courseDto = mapper.toCourseDto(course);
         courseDto.setEnrolled(isEnrolled);
         courseDto.setCreator(isTeacher);
 
-        if (authenticatedStudent != null) {
+        if (authenticatedStudentId != null) {
             for (ModuleDto moduleDto : courseDto.getModules()) {
-                double progress = calculateModuleProgress(authenticatedStudent.getId(), moduleDto.getId());
+                double progress = calculateModuleProgress(authenticatedStudentId, moduleDto.getId());
                 moduleDto.setProgress(progress);
             }
         } else {
@@ -110,6 +108,7 @@ public class CourseServiceImpl implements CourseService {
 
         return courseDto;
     }
+
 
 
 
@@ -122,20 +121,29 @@ public class CourseServiceImpl implements CourseService {
         }
 
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new ResourceNotFoundException( "Course not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        if (!course.getStudents().contains(student)) {
-            course.getStudents().add(student);
-            student.getCourses().add(course);
-            courseRepository.save(course);
-            studentRepository.save(student);
+        EnrollmentId enrollmentId = new EnrollmentId(student.getId(), course.getId());
+
+        if (enrollmentRepository.existsById(enrollmentId)) {
+            throw new RuntimeException("Student is already enrolled in this course");
         }
+
+        Enrollment enrollment = new Enrollment(enrollmentId, student, course, false);
+        enrollmentRepository.save(enrollment);
     }
+
 
     @Override
     public List<CourseSummaryDto> getAllCourses() {
         List<Course> courses=courseRepository.findAll();
         return courseMapper.toCourseSummaryDtoList(courses);
+    }
+
+    @Override
+    public List<StudentDto> getStudentForCourse(int id) {
+        List<Student> students = enrollmentRepository.findStudentsByCourseId(id);
+        return studentMapper.toStudentDtoList(students);
     }
 
     @Override
@@ -147,27 +155,56 @@ public class CourseServiceImpl implements CourseService {
             throw new RuntimeException("User is not a student");
         }
 
-        Student fetchedStudent = studentRepository.findById(user.getId())
-            .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        List<Course> courses = fetchedStudent.getCourses().stream()
-            .filter(Course::isPublic)
+        List<Course> courses = enrollmentRepository.findCoursesByStudentId(student.getId())
+            .stream()
+            .filter(course -> course.isPublic() && !isCourseCompleted(student.getId(), course.getId())) // Исключаем завершенные
             .toList();
 
         return courses.stream()
             .map(course -> {
                 CourseSummaryDto dto = courseMapper.toCourseSummaryDto(course);
-                double progress = calculateCourseProgress(fetchedStudent.getId(), course.getId());
+                double progress = calculateCourseProgress(student.getId(), course.getId());
                 dto.setProgress(progress);
                 return dto;
             })
             .collect(Collectors.toList());
     }
 
-    public double calculateCourseProgress(int studentId, int courseId) {
-        // Получаем все модули курса
+    public boolean isCourseCompleted(int studentId, int courseId) {
         List<Module> modules = moduleRepository.findByCourseId(courseId);
 
+        Student student = studentRepository.findById(studentId)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        for (Module module : modules) {
+            List<Quiz> quizzes = quizRepository.findQuizzesByModule_Id(module.getId());
+
+            for (Quiz quiz : quizzes) {
+                QuizAttempt lastAttempt = attemptRepository.findTopByStudentAndQuizOrderByAttemptNumberDesc(student, quiz);
+
+                if (lastAttempt == null || !lastAttempt.isPassed()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public void updateEnrollmentStatus(int studentId, int courseId) {
+        Enrollment enrollment = enrollmentRepository.findById(new EnrollmentId(studentId, courseId))
+            .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+        if (isCourseCompleted(studentId, courseId)) {
+            enrollment.setCompleted(true);
+            enrollmentRepository.save(enrollment);
+        }
+    }
+
+
+
+    public double calculateCourseProgress(int studentId, int courseId) {
+        List<Module> modules = moduleRepository.findByCourseId(courseId);
         double totalProgress = 0;
         int totalModules = modules.size();
 
@@ -175,8 +212,14 @@ public class CourseServiceImpl implements CourseService {
             totalProgress += calculateModuleProgress(studentId, module.getId());
         }
 
-        return totalModules == 0 ? 0 : totalProgress / totalModules;
+        double progress = totalModules == 0 ? 0 : totalProgress / totalModules;
+
+        // Check if the student has completed the course
+        updateEnrollmentStatus(studentId, courseId);
+
+        return progress;
     }
+
 
     public double calculateModuleProgress(int studentId, int moduleId) {
         int totalQuizzes = quizRepository.countByModuleId(moduleId);
@@ -203,19 +246,9 @@ public class CourseServiceImpl implements CourseService {
         return totalScore / totalQuizzes;
     }
 
-
-
-
     @Override
     public void deleteCourse(int id) {
         courseRepository.deleteById(id);
-    }
-
-    @Override
-    public List<StudentDto> getStudentForCourse(int id) {
-        Course course= courseRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        return studentMapper.toStudentDtoList(course.getStudents());
     }
 
     @Override
@@ -254,6 +287,24 @@ public class CourseServiceImpl implements CourseService {
             .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
+    }
+
+    @Override
+    public List<CourseSummaryDto> getCompletedCourses(Authentication authentication) {
+        Student student = studentRepository.findByEmail(authentication.getName())
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        List<Course> courses = enrollmentRepository.findCoursesByStudentId(student.getId());
+
+        return courses.stream()
+            .filter(course -> isCourseCompleted(student.getId(), course.getId()))
+            .map(course -> {
+                CourseSummaryDto dto = courseMapper.toCourseSummaryDto(course);
+                double progress = calculateCourseProgress(student.getId(), course.getId());
+                dto.setProgress(progress);  // Добавляем прогресс в DTO
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 
 }

@@ -34,4 +34,6 @@ public interface CourseService {
     void disallow(int id);
 
     void editCourse(CourseDto dto, int id);
+
+    List<CourseSummaryDto> getCompletedCourses(Authentication authentication);
 }

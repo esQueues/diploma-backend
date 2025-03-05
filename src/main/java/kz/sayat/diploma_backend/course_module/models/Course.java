@@ -33,9 +33,11 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Module> modules;
 
+//    @ManyToMany(mappedBy = "courses", fetch = FetchType.EAGER)
+//    private List<Student> students;
 
-    @ManyToMany(mappedBy = "courses", fetch = FetchType.EAGER)
-    private List<Student> students;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Enrollment> enrollments;
 
     @Column(name = "is_public")
     private boolean isPublic;

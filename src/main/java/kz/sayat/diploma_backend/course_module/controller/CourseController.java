@@ -35,7 +35,8 @@ public class CourseController {
 
 
     @PostMapping("/{courseId}/enroll")
-    public ResponseEntity<String> enrollCourse(@PathVariable("courseId") int courseId, Authentication authentication) {
+    public ResponseEntity<String> enrollCourse(@PathVariable("courseId") int courseId,
+                                               Authentication authentication) {
         courseService.enrollCourse(courseId,authentication);
         return ResponseEntity.ok("Student enrolled to course!");
     }
@@ -44,6 +45,12 @@ public class CourseController {
     public ResponseEntity<List<CourseSummaryDto>> getCoursesOfStudent(Authentication authentication) {
         return ResponseEntity.ok(courseService.getMyCourses(authentication));
     }
+
+    @GetMapping("/my-courses/completed")
+    public ResponseEntity<List<CourseSummaryDto>> getCompletedCourses(Authentication authentication) {
+        return ResponseEntity.ok(courseService.getCompletedCourses(authentication));
+    }
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
