@@ -5,6 +5,7 @@ import kz.sayat.diploma_backend.util.exceptions.global.CustomAuthenticationEntry
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -21,6 +22,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.List;
+
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
@@ -33,14 +36,15 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOriginPatterns(List.of("*")); // Разрешает запросы от любых источников
+                config.setAllowedHeaders(List.of("*"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowCredentials(true);
-                config.addAllowedOrigin("http://localhost:3000");
-                config.addAllowedHeader("*");
-                config.addAllowedMethod("*");
                 return config;
             }))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(requests -> requests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Разрешаем preflight-запросы
                 .requestMatchers("/api/auth/register/**", "/api/auth/login").permitAll()
                 .requestMatchers( "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api/teachers","/api/courses").permitAll()
